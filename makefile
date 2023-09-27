@@ -8,4 +8,4 @@ test:
 	pytest
 
 lint:
-	find . -name "*.py" | xargs black
+	black .
