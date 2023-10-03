@@ -6,3 +6,6 @@ install_test:
 
 test:
 	pytest
+
+lint:
+	black .
