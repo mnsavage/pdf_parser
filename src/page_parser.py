@@ -6,10 +6,10 @@ import os
 
 DO_IMAGE = True
 DO_TEST = True
-if DO_IMAGE:
-    import PIL
-    from PIL import Image
-    from PIL import ImageDraw
+# if DO_IMAGE:
+import PIL
+from PIL import Image
+from PIL import ImageDraw
 
 
 def mirror_bbox_vertical(bbox, height):
