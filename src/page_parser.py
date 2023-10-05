@@ -29,7 +29,18 @@ def mix_col(c1, c2, alpha):
     return tuple([int(c_t[i]) for i in range(4)])
 
 
-class PagePixGrid:
+def recursive_dict_add(d1, d2):
+    for k, v in d2.items():
+        if k in d1:
+            if type(d1[k]) == dict:
+                recursive_dict_add(d1[k], v)
+            else:
+                d1[k] += v
+        else:
+            d1[k] = v
+
+
+class Page_Parser:
     def __init__(self, page: pdf_layout.LTPage):
         self.page: pdf_layout.LTPage = page
         self.unpacked: bool = False
@@ -43,6 +54,8 @@ class PagePixGrid:
         self.bboxes: list[tuple] = []
         self.bbox_contents = []
         self.all_fontdata = []
+        self.all_fontnames = {}
+        self.all_sizes = {}
         self.content_bbox: None | tuple = (
             None  # The smallest box that contains all the content
         )
@@ -150,28 +163,56 @@ class PagePixGrid:
         fontdata = {}
         if type(page_content) in self.textbox_types:
             for child in page_content:
-                return self.get_fontdata(child)
+                recursive_dict_add(fontdata, self.get_fontdata(child))
         elif type(page_content) in self.text_line_types:
             for child in page_content:
-                return self.get_fontdata(child)
+                recursive_dict_add(fontdata, self.get_fontdata(child))
         elif type(page_content) in self.text_types:
             if hasattr(page_content, "fontname"):
                 if not "fontname" in fontdata:
-                    fontdata["fontname"] = [page_content.fontname]
+                    fontdata["fontname"] = {page_content.fontname: 1}
                 elif not page_content.fontname in fontdata["fontname"]:
-                    fontdata["fontname"].append(page_content.fontname)
+                    fontdata["fontname"][page_content.fontname] = 1
+                else:
+                    fontdata["fontname"][page_content.fontname] += 1
                 # print(f"Fontname: {page_content.fontname}")
             if hasattr(page_content, "fontsize"):
                 if not "fontsize" in fontdata:
-                    fontdata["fontsize"] = [page_content.fontsize]
+                    fontdata["fontsize"] = {int(page_content.fontsize + 0.5): 1}
                 elif not page_content.fontsize in fontdata["fontsize"]:
-                    fontdata["fontsize"].append(page_content.fontsize)
+                    fontdata["fontsize"][int(page_content.fontsize + 0.5)] = 1
+                else:
+                    fontdata["fontsize"][int(page_content.fontsize + 0.5)] += 1
             if hasattr(page_content, "size"):
                 if not "size" in fontdata:
-                    fontdata["size"] = [page_content.size]
+                    fontdata["size"] = {int(page_content.size + 0.5): 1}
                 elif not page_content.size in fontdata["size"]:
-                    fontdata["size"].append(page_content.size)
+                    fontdata["size"][int(page_content.size + 0.5)] = 1
+                else:
+                    fontdata["size"][int(page_content.size + 0.5)] += 1
         return fontdata
+
+    def data_push_fontsize(self, fontdata: dict):
+        if "fontsize" in fontdata:
+            for size, num in fontdata["fontsize"].items():
+                if not size in self.all_sizes:
+                    self.all_sizes[size] = num
+                else:
+                    self.all_sizes[size] += num
+        elif "size" in fontdata:
+            for size, num in fontdata["size"].items():
+                if not size in self.all_sizes:
+                    self.all_sizes[size] = num
+                else:
+                    self.all_sizes[size] += num
+
+    def data_push_fontname(self, fontdata: dict):
+        if "fontname" in fontdata:
+            for name, num in fontdata["fontname"].items():
+                if not name in self.all_fontnames:
+                    self.all_fontnames[name] = num
+                else:
+                    self.all_fontnames[name] += num
 
     def add_bbox(
         self, bbox: tuple, color: tuple | None = None, fillColor: tuple | None = None
@@ -203,6 +244,8 @@ class PagePixGrid:
             fontdata = self.get_fontdata(page_content)
             if not fontdata in self.all_fontdata:
                 self.all_fontdata.append(fontdata)
+            self.data_push_fontname(fontdata)
+            self.data_push_fontsize(fontdata)
         else:
             # print(f"Type: {type(page_content)}")
             text = None
@@ -259,23 +302,61 @@ class PagePixGrid:
 
 if __name__ == "__main__":
     if DO_TEST:
-        # we are in /src, we want to pull pdf from /prototyping
-        file = os.path.join(
-            os.path.dirname(__file__), "..", "prototyping", "Homework_1.pdf"
-        )
-        output = pdf_hl.extract_pages(file)
-        # output = pdf_hl.extract_pages("Homework_1.pdf")
-        # print(output)
-        output = list(output)
-
-        page_handlers = []
-        for page in output:
-            page_handlers.append(PagePixGrid(page))
-        for ind, page in enumerate(page_handlers):
-            page: PagePixGrid
-            page.unpack_page()
-            img_filename = f"page_{ind}.png"
-            path_filename = os.path.join(
-                os.path.dirname(__file__), "..", "output_files", img_filename
+        output_file_test = False
+        get_fontdata_test = False
+        if output_file_test:
+            # we are in /src, we want to pull pdf from /prototyping
+            file = os.path.join(
+                os.path.dirname(__file__), "..", "prototyping", "Homework_1.pdf"
             )
-            page.save(path_filename, bbox_cmp=False, content_bbox=True, draw_text=True)
+            output = pdf_hl.extract_pages(file)
+            # output = pdf_hl.extract_pages("Homework_1.pdf")
+            # print(output)
+            output = list(output)
+
+            page_handlers = []
+            for page in output:
+                page_handlers.append(Page_Parser(page))
+            for ind, page in enumerate(page_handlers):
+                page: Page_Parser
+                page.unpack_page()
+                img_filename = f"page_{ind}.png"
+                path_filename = os.path.join(
+                    os.path.dirname(__file__), "..", "output_files", img_filename
+                )
+                page.save(
+                    path_filename, bbox_cmp=False, content_bbox=True, draw_text=True
+                )
+
+        if get_fontdata_test:
+            # we are in /src, we want to pull pdf from /prototyping
+            file = os.path.join(
+                os.path.dirname(__file__), "..", "prototyping", "Homework_1.pdf"
+            )
+            output = pdf_hl.extract_pages(file)
+            output = list(output)
+
+            page_handlers = []
+            for page in output:
+                page_handlers.append(Page_Parser(page))
+
+            all_fontnames = {}
+            all_sizes = {}
+
+            for ind, page in enumerate(page_handlers):
+                page: Page_Parser
+                page.unpack_page()
+                print(f"Page {ind}")
+                # print(page.all_fontdata)
+                print(page.all_fontnames)
+                print(page.all_sizes)
+                print()
+                recursive_dict_add(all_fontnames, page.all_fontnames)
+                recursive_dict_add(all_sizes, page.all_sizes)
+
+            print("All fontnames:")
+            print(all_fontnames)
+            print()
+            print("All sizes:")
+            print(all_sizes)
+            print()
