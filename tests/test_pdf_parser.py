@@ -33,6 +33,4 @@ def test_margin_check():
     )
     parser = Pdf_Parser(file_name_path)
 
-    parser.unpack()
-
     assert parser.margin_check(72, 72) == True
