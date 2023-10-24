@@ -97,6 +97,14 @@ class Page_Parser:
             self.content_bbox = (min(x0, x), min(y0, y), max(x1, x), max(y1, y))
 
     def fill(self, x: int, y: int, color: tuple | None = None):
+        if x < 0:
+            x = 0
+        elif x >= self.width:
+            x = self.width - 1
+        if y < 0:
+            y = 0
+        elif y >= self.height:
+            y = self.height - 1
         if color is None:
             color = (255, 0, 0, 255)
         color: tuple

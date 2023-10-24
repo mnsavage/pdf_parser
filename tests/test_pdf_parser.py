@@ -34,3 +34,13 @@ def test_margin_check():
     parser = Pdf_Parser(file_name_path)
 
     assert parser.margin_check(72, 72) == True
+
+def test_margin_check_bad():
+    #Select a PDF file to test with, assert that the margins are good
+    file_name = "bad_margins.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.margin_check(72, 72) == False
