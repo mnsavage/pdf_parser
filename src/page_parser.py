@@ -88,6 +88,7 @@ class Page_Parser:
             pdf_layout.LTTextLineVertical,
         ]
         self.text_types = [pdf_layout.LTChar]
+        self.raw_text = None
 
     def content_bbox_extend(self, x: int, y: int):
         if self.content_bbox is None:
@@ -258,6 +259,27 @@ class Page_Parser:
             # print(f"Type: {type(page_content)}")
             text = None
         self.add_bbox_content(text, textColor, fontdata)
+
+    def filled_ratio(self, ratio)->bool:
+        width = self.width
+        height = self.height
+        area = width * height
+        if self.content_bbox == (None):
+            return False
+        c_width = self.content_bbox[2] - self.content_bbox[0]
+        c_height = self.content_bbox[3] - self.content_bbox[1]
+        c_area = c_width * c_height
+        if c_area / area < ratio:
+            return False
+        return True
+    
+    def get_raw_text(self):
+        if self.raw_text is None:
+            self.raw_text = self.page.get_text()
+        return self.raw_text
+    
+    def get_char_count(self):
+        return len(self.get_raw_text())
 
     def draw(
         self, bbox_cmp=False, content_bbox=False, *args, **kwargs

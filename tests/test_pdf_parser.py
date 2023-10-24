@@ -44,3 +44,13 @@ def test_margin_check_bad():
     parser = Pdf_Parser(file_name_path)
 
     assert parser.margin_check(72, 72) == False
+
+def test_pages_empty():
+    #Select a PDF file to test with, assert that there are no empty pages
+    file_name = "Homework_1.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_empty_pages_area_charcount() == True

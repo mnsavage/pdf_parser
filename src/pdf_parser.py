@@ -62,3 +62,37 @@ class Pdf_Parser:
     
     def _inches_to_points(self, inches):
         return inches * 72
+    
+
+    #Super basic case
+    #Return true if no pages are empty
+    def check_empty_pages(self):
+        self.unpack()
+        for page in self._page_handlers:
+            page: Page_Parser
+            #If the content_bbox is unchanged from the default, return False
+            if page.content_bbox == (None):
+                return False
+        return True
+    
+    #More advanced case, using the amount of filled space
+    #Return true if no pages are empty
+    def check_empty_pages_area(self, ratio=0.01):
+        self.unpack()
+        for page in self._page_handlers:
+            page: Page_Parser
+            #If the filled ratio is less than ratio, return False
+            if not page.filled_ratio(ratio):
+                return False
+        return True
+    
+    #More advanced case, using the amount of filled space and the char count
+    #Return true if no pages are empty
+    def check_empty_pages_area_charcount(self, ratio=0.01, minchars=3):
+        self.unpack()
+        for page in self._page_handlers:
+            page: Page_Parser
+            # If the filled ratio is less than ratio, AND the char count is less than minchars, return False
+            if not page.filled_ratio(ratio) and page.get_char_count() < minchars:
+                return False
+        return True
