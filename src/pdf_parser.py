@@ -118,3 +118,26 @@ class Pdf_Parser:
             if len(set(fonts)) > 1:
                 return False
         return True
+    
+    def check_bold_throughout_pdf(self):
+        self.unpack()
+
+        for page in self._page_handlers:
+            page: Page_Parser
+            fonts = page.all_fontnames
+            for font in fonts:
+                if page.is_bold(font):    
+                    return True
+        return False
+
+    def check_bold_in_page_range(self, start, end):
+        self.unpack()
+        # Make sure to pass in preliminary pages
+
+        for page in self._page_handlers[start:end]:
+            page: Page_Parser
+            fonts = page.all_fontnames
+            for font in fonts:
+                if page.is_bold(font):    
+                    return True
+        return False

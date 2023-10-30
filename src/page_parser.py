@@ -328,12 +328,40 @@ class Page_Parser:
             textCol = self.color_enums["black"]
             self.push_content(box, outlineCol, fillCol, textCol)
         self.unpacked = True
+    
+    def is_bold(self, font_name):
+        bold_indicators = [
+            "Bold",
+            "Bd",
+            "Demi",
+            "Black",
+            "Heavy",
+            "Fat",
+            "ExtraBold", "ExBold",
+            "UltraBold",
+            "Super",
+            "Strong",
+            "Solid",
+            "Thick",
+            "Fett",
+            "Grassetto",
+            "Negrita"
+        ]
 
+        # Convert the font name to lower case to ensure case-insensitive comparison
+        font_name_lower = font_name.lower()
+
+        # Check if any of the bold indicators are in the font name
+        return any(bold_indicator.lower() in font_name_lower for bold_indicator in bold_indicators)
+
+    #def is_preliminary_page(self):
+        #TODO: Implement
 
 if __name__ == "__main__":
     if DO_TEST:
         output_file_test = False
         get_fontdata_test = False
+        is_bold = True
         if output_file_test:
             # we are in /src, we want to pull pdf from /prototyping
             file = os.path.join(
@@ -390,3 +418,26 @@ if __name__ == "__main__":
             print("All sizes:")
             print(all_sizes)
             print()
+
+        if is_bold:
+            file = os.path.join(
+                os.path.dirname(__file__), "..", "prototyping", "bold_empty_pages.pdf"
+            )
+            output = pdf_hl.extract_pages(file)
+            output = list(output)
+
+            page_handlers = []
+            for page in output:
+                page_handlers.append(Page_Parser(page))
+
+            all_fontnames = {}
+
+            for ind, page in enumerate(page_handlers):
+                page: Page_Parser
+                page.unpack_page()
+                print(f"Page {ind}")
+                for fontname in page.all_fontnames:
+                    if page.is_bold(fontname):
+                        print(f"{fontname} is bold")
+                    else:
+                        print(f"{fontname} is not bold")    
