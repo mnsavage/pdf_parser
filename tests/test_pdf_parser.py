@@ -54,3 +54,5 @@ def test_pages_empty():
     parser = Pdf_Parser(file_name_path)
 
     assert parser.check_empty_pages_area_charcount() == True
+
+#TODO: Write tests for bold, font size, and font name
