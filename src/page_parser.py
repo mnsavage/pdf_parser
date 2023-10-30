@@ -3,6 +3,12 @@ import pdfminer
 import pdfminer.high_level as pdf_hl
 import pdfminer.layout as pdf_layout
 import os
+from pdfminer.layout import LAParams, LTTextBox, LTTextLine
+from pdfminer.pdfpage import PDFPage
+from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
+from pdfminer.converter import PDFPageAggregator
+import io
+import re
 
 DO_IMAGE = True
 DO_TEST = True
@@ -354,15 +360,60 @@ class Page_Parser:
 
         # Check if any of the bold indicators are in the font name
         return any(bold_indicator.lower() in font_name_lower for bold_indicator in bold_indicators)
+    
+    def is_preliminary_page(self, text, page_number):
+        if page_number == 1:
+            return True
+        
+        if page_number == 2:
+            return True
 
-    #def is_preliminary_page(self):
-        #TODO: Implement
+        # Check for Roman numeral page numbers
+        words = text.split()
+        for word in words:
+            if is_roman_numeral(word):
+                return True
+
+        return False
+    
+    def get_raw_text(self, page_layout):
+        """Extract text from a page layout."""
+        texts = []
+        for element in page_layout:
+            if isinstance(element, LTTextBox) or isinstance(element, LTTextLine):
+                texts.append(element.get_text())
+        return ' '.join(texts).strip()
+
+def is_roman_numeral(s):
+    roman_numeral_pattern = '^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
+    return re.match(roman_numeral_pattern, s.strip(), re.IGNORECASE) is not None  
+
+def extract_text_from_pdf(file_path):
+    # Initialize PDFMiner components
+    resource_manager = PDFResourceManager()
+    fake_file_handle = io.StringIO()
+    laparams = LAParams()
+    converter = PDFPageAggregator(resource_manager, laparams=laparams)
+    page_interpreter = PDFPageInterpreter(resource_manager, converter)
+
+    # Open the PDF file
+    with open(file_path, 'rb') as fh:
+        # Process each page in the PDF
+        for page_number, page in enumerate(PDFPage.get_pages(fh, caching=True, check_extractable=True)):
+            page_interpreter.process_page(page)
+            layout = converter.get_result()
+            yield page_number, layout
+
+    # close open handles
+    converter.close()
+    fake_file_handle.close()
 
 if __name__ == "__main__":
     if DO_TEST:
         output_file_test = False
         get_fontdata_test = False
         is_bold = True
+        is_preliminary = True
         if output_file_test:
             # we are in /src, we want to pull pdf from /prototyping
             file = os.path.join(
@@ -420,25 +471,39 @@ if __name__ == "__main__":
             print(all_sizes)
             print()
 
+        if is_preliminary:
+            file = os.path.join(os.path.dirname(__file__), "..", "prototyping", "example_thesis_caroline.pdf")
+            output = pdf_hl.extract_pages(file)
+            output = list(output)
+
+            for page_number, layout in enumerate(output):
+                page = Page_Parser(layout)
+                raw_text = page.get_raw_text(layout)
+
+                # Check if the current page is a preliminary page
+                if page.is_preliminary_page(raw_text, page_number + 1):
+                    print(f"Page {page_number + 1} is a preliminary page.")
+                else:
+                    print(f"Page {page_number + 1} is not a preliminary page.")
+
         if is_bold:
             file = os.path.join(
-                os.path.dirname(__file__), "..", "prototyping", "bold_empty_pages.pdf"
+                os.path.dirname(__file__), "..", "prototyping", "example_thesis_caroline.pdf"
             )
             output = pdf_hl.extract_pages(file)
             output = list(output)
 
-            page_handlers = []
-            for page in output:
-                page_handlers.append(Page_Parser(page))
-
-            all_fontnames = {}
-
-            for ind, page in enumerate(page_handlers):
-                page: Page_Parser
+            for ind, page_layout in enumerate(output):
+                page = Page_Parser(page_layout)
                 page.unpack_page()
-                print(f"Page {ind}")
-                for fontname in page.all_fontnames:
-                    if page.is_bold(fontname):
-                        print(f"{fontname} is bold")
-                    else:
-                        print(f"{fontname} is not bold")    
+                raw_text = page.get_raw_text(page_layout)
+
+                # Check if the current page is a preliminary page
+                if page.is_preliminary_page(raw_text, ind + 1):
+                    for fontname in page.all_fontnames:
+                        if page.is_bold(fontname):
+                            print(f"On preliminary page {ind + 1}, {fontname} is bold")
+                        else:
+                            print(f"On preliminary page {ind + 1}, {fontname} is not bold")
+                else:
+                    print(f"Page {ind + 1} is not a preliminary page")

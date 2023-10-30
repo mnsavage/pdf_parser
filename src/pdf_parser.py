@@ -167,11 +167,23 @@ class Pdf_Parser:
                     return True
         return False
 
-    def check_bold_in_page_range(self, start, end):
+    def _find_preliminary_pages(self):
         self.unpack()
-        #TODO: Make sure to pass in preliminary pages
 
-        for page in self._page_handlers[start:end]:
+        preliminary_pages = []
+        for page in self._page_handlers:
+            page: Page_Parser
+            if page.is_preliminary_page():
+                preliminary_pages.append(page)
+        
+        return preliminary_pages
+
+    def check_bold_in_preliminary_pages(self):
+        self.unpack()
+        
+        preliminary_pages = self._find_preliminary_pages()
+
+        for page in preliminary_pages:
             page: Page_Parser
             fonts = page.all_fontnames
             for font in fonts:
