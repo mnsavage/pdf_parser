@@ -111,7 +111,7 @@ class Pdf_Parser:
     
     def check_font_same_throughout_pdf(self):
         self.unpack()
-
+        #TODO: Make changes to this to check for bold, italic, etc.
         for page in self._page_handlers:
             page: Page_Parser
             fonts = page.all_fontnames
@@ -132,7 +132,7 @@ class Pdf_Parser:
 
     def check_bold_in_page_range(self, start, end):
         self.unpack()
-        # Make sure to pass in preliminary pages
+        #TODO: Make sure to pass in preliminary pages
 
         for page in self._page_handlers[start:end]:
             page: Page_Parser
