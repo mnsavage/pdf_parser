@@ -164,8 +164,8 @@ class Pdf_Parser:
             fonts = page.all_fontnames
             for font in fonts:
                 if page.is_bold(font):    
-                    return True
-        return False
+                    return False
+        return True
 
     def _find_preliminary_pages(self):
         self.unpack()
@@ -188,5 +188,5 @@ class Pdf_Parser:
             fonts = page.all_fontnames
             for font in fonts:
                 if page.is_bold(font):    
-                    return True
-        return False
+                    return False
+        return True

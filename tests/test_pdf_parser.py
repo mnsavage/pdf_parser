@@ -56,3 +56,33 @@ def test_pages_empty():
     assert parser.check_empty_pages_area_charcount() == True
 
 #TODO: Write tests for bold, font size, and font name
+
+def test_no_bold_in_preliminary_pages():
+    #Select a PDF file to test with, assert that there are no bold characters in the preliminary pages
+    file_name = "example_thesis_caroline.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_bold_in_preliminary_pages() == True
+
+def test_font_size():
+    #Select a PDF file to test with, assert that there are no font size changes in the preliminary pages
+    file_name = "example_thesis_caroline.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_font_size_same_throughout_pdf() == True
+
+def test_font_name():
+    #Select a PDF file to test with, assert that there are no font name changes in the preliminary pages
+    file_name = "example_thesis_caroline.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_font_same_throughout_pdf() == True
