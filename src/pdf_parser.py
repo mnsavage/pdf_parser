@@ -108,3 +108,13 @@ class Pdf_Parser:
             elif not font_sizes[12]:
                 return False
         return True
+    
+    def check_font_same_throughout_pdf(self):
+        self.unpack()
+
+        for page in self._page_handlers:
+            page: Page_Parser
+            fonts = page.all_fontnames
+            if len(set(fonts)) > 1:
+                return False
+        return True
