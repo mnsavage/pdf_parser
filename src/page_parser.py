@@ -345,7 +345,8 @@ class Page_Parser:
             "Thick",
             "Fett",
             "Grassetto",
-            "Negrita"
+            "Negrita",
+            "Medium"
         ]
 
         # Convert the font name to lower case to ensure case-insensitive comparison
