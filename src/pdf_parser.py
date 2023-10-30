@@ -143,6 +143,7 @@ class Pdf_Parser:
             normalized_fonts = {self._normalize_font_name(font) for font in fonts}
 
             # Filter out auxiliary fonts if other fonts are present
+            # This is because subscript/superscript characters are often in auxiliary fonts even though the main text is in a different font
             if len(normalized_fonts.difference(auxiliary_fonts)) > 0:
                 normalized_fonts -= auxiliary_fonts
 
