@@ -2,7 +2,7 @@ import pdfminer
 import pdfminer.high_level as pdf_hl
 import pdfminer.layout as pdf_layout
 import os
-from src.page_parser import Page_Parser
+from page_parser import Page_Parser
 
 
 class Pdf_Parser:
@@ -94,5 +94,17 @@ class Pdf_Parser:
             page: Page_Parser
             # If the filled ratio is less than ratio, AND the char count is less than minchars, return False
             if not page.filled_ratio(ratio) and page.get_char_count() < minchars:
+                return False
+        return True
+    
+    def check_font_size_same_throughout_pdf(self):
+        self.unpack()
+
+        for page in self._page_handlers:
+            page: Page_Parser
+            font_sizes = page.all_sizes
+            if len(set(font_sizes)) > 1:
+                return False
+            elif not font_sizes[12]:
                 return False
         return True
