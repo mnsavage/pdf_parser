@@ -98,25 +98,61 @@ class Pdf_Parser:
         return True
     
     def check_font_size_same_throughout_pdf(self):
+            self.unpack()
+
+            for page in self._page_handlers:
+                page: Page_Parser
+                font_sizes = page.all_sizes
+                if len(set(font_sizes)) > 1:
+                    return False
+                elif not font_sizes[12]:
+                    return False
+            return True
+        
+    def _normalize_font_name(self, font_name):
+        # Remove subset tag, if exists
+        if '+' in font_name:
+            font_name = font_name.split('+')[-1]
+
+        # Lowercase the font name for uniformity
+        font_name = font_name.lower()
+
+        # Define a list of style and weight indicators to remove
+        style_indicators = ["bold", "italic", "oblique", "regular", "bd", "it", "lt", "med", "heavy", "black", "light", "-"]
+
+        # Remove these indicators
+        for indicator in style_indicators:
+            font_name = font_name.replace(indicator, "")
+
+        # Handle special cases (like 'MT' in 'ArialMT')
+        special_cases = {"mt": ""}
+        for case in special_cases:
+            font_name = font_name.replace(case, special_cases[case])
+
+        return font_name.strip()
+
+    def check_font_same_throughout_pdf(self):
         self.unpack()
+        base_fonts = set()
+        auxiliary_fonts = {"symbol", "arial"}  # Add more if needed
 
         for page in self._page_handlers:
             page: Page_Parser
-            font_sizes = page.all_sizes
-            if len(set(font_sizes)) > 1:
-                return False
-            elif not font_sizes[12]:
-                return False
-        return True
-    
-    def check_font_same_throughout_pdf(self):
-        self.unpack()
-        #TODO: Make changes to this to check for bold, italic, etc.
-        for page in self._page_handlers:
-            page: Page_Parser
             fonts = page.all_fontnames
-            if len(set(fonts)) > 1:
+
+            normalized_fonts = {self._normalize_font_name(font) for font in fonts}
+
+            # Filter out auxiliary fonts if other fonts are present
+            if len(normalized_fonts.difference(auxiliary_fonts)) > 0:
+                normalized_fonts -= auxiliary_fonts
+
+            base_fonts.update(normalized_fonts)
+
+            if len(base_fonts) > 1:
+                for font in base_fonts:
+                    print(font)
                 return False
+
         return True
     
     def check_bold_throughout_pdf(self):
