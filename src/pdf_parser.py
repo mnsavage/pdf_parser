@@ -2,7 +2,7 @@ import pdfminer
 import pdfminer.high_level as pdf_hl
 import pdfminer.layout as pdf_layout
 import os
-from page_parser import Page_Parser
+
 
 
 class Pdf_Parser:
@@ -190,3 +190,7 @@ class Pdf_Parser:
                 if page.is_bold(font):    
                     return False
         return True
+
+    def get_file_name(self):
+        return self._file_name
+

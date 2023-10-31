@@ -86,3 +86,10 @@ def test_font_name():
     parser = Pdf_Parser(file_name_path)
 
     assert parser.check_font_same_throughout_pdf() == True
+
+def test_get_file_name():
+    file_name = "file/path/file.pdf"
+
+    parser = Pdf_Parser(file_name)
+
+    assert file_name == parser.get_file_name()
