@@ -11,6 +11,7 @@ import io
 import re
 
 DO_IMAGE = True
+NEED_RENDER = False
 DO_TEST = True
 # if DO_IMAGE:
 import PIL
@@ -157,17 +158,25 @@ class Page_Parser:
         left = min(x0, x1)
         right = max(x0, x1)
         width = right - left
-        self.fill_line(left, top, right, top, color)
-        self.fill_line(left, bottom, right, bottom, color)
-        self.fill_line(left, top, left, bottom, color)
-        self.fill_line(right, top, right, bottom, color)
-        if height > 1 and width > 1:
-            if fillColor is None:
-                fillColor = (color[0], color[1], color[2], 100)
-            fillColor: tuple
-            for x in range(left + 1, right):
-                for y in range(top + 1, bottom):
-                    self.fill(x, y, fillColor)
+        # Some computational cleanup, we don't want to render the boxes and such outside of debug
+        if NEED_RENDER:
+            self.fill_line(left, top, right, top, color)
+            self.fill_line(left, bottom, right, bottom, color)
+            self.fill_line(left, top, left, bottom, color)
+            self.fill_line(right, top, right, bottom, color)
+            if height > 1 and width > 1:
+                if fillColor is None:
+                    fillColor = (color[0], color[1], color[2], 100)
+                fillColor: tuple
+                for x in range(left + 1, right):
+                    for y in range(top + 1, bottom):
+                        self.fill(x, y, fillColor)
+        else:
+            # fill the corners only
+            self.fill(left, top, color)
+            self.fill(right, top, color)
+            self.fill(left, bottom, color)
+            self.fill(right, bottom, color)
 
     def mirror_bbox_vertical(self, bbox: tuple) -> tuple:
         return mirror_bbox_vertical(bbox, self.height)
@@ -266,7 +275,7 @@ class Page_Parser:
             text = None
         self.add_bbox_content(text, textColor, fontdata)
 
-    def filled_ratio(self, ratio)->bool:
+    def filled_ratio(self, ratio) -> bool:
         width = self.width
         height = self.height
         area = width * height
@@ -278,12 +287,14 @@ class Page_Parser:
         if c_area / area < ratio:
             return False
         return True
-    
-    def get_raw_text(self):
+
+    def get_raw_text(self, *args, **kwargs):
         if self.raw_text is None:
-            self.raw_text = self.page.get_text()
+            self.page: pdf_layout.LTPage
+            # self.raw_text = self.page
+            self.raw_text = self._recurs_extract_text(self.page)
         return self.raw_text
-    
+
     def get_char_count(self):
         return len(self.get_raw_text())
 
@@ -302,24 +313,6 @@ class Page_Parser:
                 draw.rectangle(bbox, outline=(0, 0, 0, 255))
         if content_bbox:
             draw.rectangle(self.content_bbox, outline=(0, 255, 0, 255))
-        # if draw_text:
-        #     for i in range(len(self.bboxes)):
-        #         content = self.bbox_contents[i]
-        #         text = content["text"]
-        #         color = content["color"]
-        #         fontdata = content["fontdata"]
-        #         fontsize = 12
-        #         if fontdata is not None and ("fontsize" in fontdata or "size" in fontdata):
-        #             if "fontsize" in fontdata:
-        #                 fontsize = fontdata["fontsize"]
-        #             else:
-        #                 fontsize = fontdata["size"]
-        #         if fontdata is not None and "fontname" in fontdata:
-        #             font = get_font(fontdata["fontname"], fontsize)
-        #         else:
-        #             font = get_font("", fontsize)
-        #         if text is not None:
-        #             draw.text(self.bboxes[i][0:2], text, fill = color, font = font)
         return img
 
     def save(self, filename, *args, **kwargs):
@@ -334,7 +327,7 @@ class Page_Parser:
             textCol = self.color_enums["black"]
             self.push_content(box, outlineCol, fillCol, textCol)
         self.unpacked = True
-    
+
     def is_bold(self, font_name):
         bold_indicators = [
             "Bold",
@@ -343,7 +336,8 @@ class Page_Parser:
             "Black",
             "Heavy",
             "Fat",
-            "ExtraBold", "ExBold",
+            "ExtraBold",
+            "ExBold",
             "UltraBold",
             "Super",
             "Strong",
@@ -352,19 +346,30 @@ class Page_Parser:
             "Fett",
             "Grassetto",
             "Negrita",
-            "Medium"
+            "Medium",
         ]
 
         # Convert the font name to lower case to ensure case-insensitive comparison
         font_name_lower = font_name.lower()
 
         # Check if any of the bold indicators are in the font name
-        return any(bold_indicator.lower() in font_name_lower for bold_indicator in bold_indicators)
-    
-    def is_preliminary_page(self, text, page_number):
+        return any(
+            bold_indicator.lower() in font_name_lower
+            for bold_indicator in bold_indicators
+        )
+
+    def is_preliminary_page(self, text=None, page_number=None):
+        if page_number is None:
+            # Page number is not provided, so we assume it is the first page
+            if hasattr(self, "page_number"):
+                page_number = self.page_number
+            else:
+                page_number = 1
+        if text is None:
+            text = self.get_raw_text(self.page)
         if page_number == 1:
             return True
-        
+
         if page_number == 2:
             return True
 
@@ -375,18 +380,41 @@ class Page_Parser:
                 return True
 
         return False
-    
-    def get_raw_text(self, page_layout):
+
+    def _get_raw_text(self, page_layout):
         """Extract text from a page layout."""
+        # CHAD: I think this misses some text when there are subdivided textboxes, like table cells
+        # Need to test if this is better or worse than the recursive version
+        if self.raw_text is not None:
+            return self.raw_text
         texts = []
         for element in page_layout:
             if isinstance(element, LTTextBox) or isinstance(element, LTTextLine):
                 texts.append(element.get_text())
-        return ' '.join(texts).strip()
+        raw_text = " ".join(texts).strip()
+        self.raw_text = raw_text
+        return raw_text
+
+    def _recurs_extract_text(self, element=None):
+        # CHAD: This should get ALL text, but could be slow. Needs to be tested
+        if element is None:
+            element = self.page
+        text = ""
+        if type(element) in self.textbox_types:
+            for child in element:
+                text += self._recurs_extract_text(child)
+        elif type(element) in self.text_line_types:
+            for child in element:
+                text += child.get_text()
+        elif type(element) in self.text_types:
+            text += element.get_text()
+        return text
+
 
 def is_roman_numeral(s):
-    roman_numeral_pattern = '^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$'
-    return re.match(roman_numeral_pattern, s.strip(), re.IGNORECASE) is not None  
+    roman_numeral_pattern = "^M{0,4}(CM|CD|D?C{0,3})(XC|XL|L?X{0,3})(IX|IV|V?I{0,3})$"
+    return re.match(roman_numeral_pattern, s.strip(), re.IGNORECASE) is not None
+
 
 def extract_text_from_pdf(file_path):
     # Initialize PDFMiner components
@@ -397,9 +425,11 @@ def extract_text_from_pdf(file_path):
     page_interpreter = PDFPageInterpreter(resource_manager, converter)
 
     # Open the PDF file
-    with open(file_path, 'rb') as fh:
+    with open(file_path, "rb") as fh:
         # Process each page in the PDF
-        for page_number, page in enumerate(PDFPage.get_pages(fh, caching=True, check_extractable=True)):
+        for page_number, page in enumerate(
+            PDFPage.get_pages(fh, caching=True, check_extractable=True)
+        ):
             page_interpreter.process_page(page)
             layout = converter.get_result()
             yield page_number, layout
@@ -407,6 +437,7 @@ def extract_text_from_pdf(file_path):
     # close open handles
     converter.close()
     fake_file_handle.close()
+
 
 if __name__ == "__main__":
     if DO_TEST:
@@ -472,7 +503,12 @@ if __name__ == "__main__":
             print()
 
         if is_preliminary:
-            file = os.path.join(os.path.dirname(__file__), "..", "prototyping", "example_thesis_caroline.pdf")
+            file = os.path.join(
+                os.path.dirname(__file__),
+                "..",
+                "prototyping",
+                "example_thesis_caroline.pdf",
+            )
             output = pdf_hl.extract_pages(file)
             output = list(output)
 
@@ -488,7 +524,10 @@ if __name__ == "__main__":
 
         if is_bold:
             file = os.path.join(
-                os.path.dirname(__file__), "..", "prototyping", "example_thesis_caroline.pdf"
+                os.path.dirname(__file__),
+                "..",
+                "prototyping",
+                "example_thesis_caroline.pdf",
             )
             output = pdf_hl.extract_pages(file)
             output = list(output)
@@ -504,6 +543,8 @@ if __name__ == "__main__":
                         if page.is_bold(fontname):
                             print(f"On preliminary page {ind + 1}, {fontname} is bold")
                         else:
-                            print(f"On preliminary page {ind + 1}, {fontname} is not bold")
+                            print(
+                                f"On preliminary page {ind + 1}, {fontname} is not bold"
+                            )
                 else:
                     print(f"Page {ind + 1} is not a preliminary page")
