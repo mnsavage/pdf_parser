@@ -1,5 +1,4 @@
 # %pip install pdfminer.six
-import pdfminer
 import pdfminer.high_level as pdf_hl
 import pdfminer.layout as pdf_layout
 import os
