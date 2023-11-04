@@ -23,7 +23,7 @@ def test_unpack():
 
     assert len(parser._pages) > 0
     assert len(parser._page_handlers) > 0
-    assert parser.get_unpacked() == True
+    assert parser.get_unpacked() is True
 
 
 def test_margin_check():
@@ -34,7 +34,7 @@ def test_margin_check():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.margin_check(72, 72) == True
+    assert parser.margin_check(72, 72) is True
 
 
 def test_margin_check_bad():
@@ -45,7 +45,7 @@ def test_margin_check_bad():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.margin_check(72, 72) == False
+    assert parser.margin_check(72, 72) is False
 
 
 def test_pages_empty():
@@ -56,7 +56,7 @@ def test_pages_empty():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_empty_pages_area_charcount() == True
+    assert parser.check_empty_pages_area_charcount() is True
 
 
 # TODO: Write tests for bold, font size, and font name
@@ -70,7 +70,7 @@ def test_no_bold_in_preliminary_pages():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_bold_in_preliminary_pages() == True
+    assert parser.check_bold_in_preliminary_pages() is True
 
 
 def test_font_size():
@@ -81,7 +81,7 @@ def test_font_size():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_font_size_same_throughout_pdf() == False
+    assert parser.check_font_size_same_throughout_pdf() is False
 
 
 def test_font_name():
@@ -92,7 +92,7 @@ def test_font_name():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_font_same_throughout_pdf() == False
+    assert parser.check_font_same_throughout_pdf() is False
 
 
 def test_get_file_name():

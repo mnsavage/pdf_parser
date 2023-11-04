@@ -1,6 +1,5 @@
 # app.py
 import argparse
-from pdf_parser import Pdf_Parser
 
 
 def main():

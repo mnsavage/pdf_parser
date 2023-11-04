@@ -8,14 +8,14 @@ from pdfminer.pdfinterp import PDFResourceManager, PDFPageInterpreter
 from pdfminer.converter import PDFPageAggregator
 import io
 import re
+import PIL
+from PIL import Image
+from PIL import ImageDraw
+
 
 DO_IMAGE = True
 NEED_RENDER = False
 DO_TEST = True
-# if DO_IMAGE:
-import PIL
-from PIL import Image
-from PIL import ImageDraw
 
 
 def mirror_bbox_vertical(bbox, height):
@@ -38,7 +38,7 @@ def mix_col(c1, c2, alpha):
 def recursive_dict_add(d1, d2):
     for k, v in d2.items():
         if k in d1:
-            if type(d1[k]) == dict:
+            if type(d1[k]) is dict:
                 recursive_dict_add(d1[k], v)
             else:
                 d1[k] += v
@@ -192,24 +192,24 @@ class Page_Parser:
                 recursive_dict_add(fontdata, self.get_fontdata(child))
         elif type(page_content) in self.text_types:
             if hasattr(page_content, "fontname"):
-                if not "fontname" in fontdata:
+                if "fontname" not in fontdata:
                     fontdata["fontname"] = {page_content.fontname: 1}
-                elif not page_content.fontname in fontdata["fontname"]:
+                elif page_content.fontname not in fontdata["fontname"]:
                     fontdata["fontname"][page_content.fontname] = 1
                 else:
                     fontdata["fontname"][page_content.fontname] += 1
                 # print(f"Fontname: {page_content.fontname}")
             if hasattr(page_content, "fontsize"):
-                if not "fontsize" in fontdata:
+                if "fontsize" not in fontdata:
                     fontdata["fontsize"] = {int(page_content.fontsize + 0.5): 1}
-                elif not page_content.fontsize in fontdata["fontsize"]:
+                elif page_content.fontsize not in fontdata["fontsize"]:
                     fontdata["fontsize"][int(page_content.fontsize + 0.5)] = 1
                 else:
                     fontdata["fontsize"][int(page_content.fontsize + 0.5)] += 1
             if hasattr(page_content, "size"):
-                if not "size" in fontdata:
+                if "size" not in fontdata:
                     fontdata["size"] = {int(page_content.size + 0.5): 1}
-                elif not page_content.size in fontdata["size"]:
+                elif page_content.size not in fontdata["size"]:
                     fontdata["size"][int(page_content.size + 0.5)] = 1
                 else:
                     fontdata["size"][int(page_content.size + 0.5)] += 1
@@ -218,13 +218,13 @@ class Page_Parser:
     def data_push_fontsize(self, fontdata: dict):
         if "fontsize" in fontdata:
             for size, num in fontdata["fontsize"].items():
-                if not size in self.all_sizes:
+                if size not in self.all_sizes:
                     self.all_sizes[size] = num
                 else:
                     self.all_sizes[size] += num
         elif "size" in fontdata:
             for size, num in fontdata["size"].items():
-                if not size in self.all_sizes:
+                if size not in self.all_sizes:
                     self.all_sizes[size] = num
                 else:
                     self.all_sizes[size] += num
@@ -232,7 +232,7 @@ class Page_Parser:
     def data_push_fontname(self, fontdata: dict):
         if "fontname" in fontdata:
             for name, num in fontdata["fontname"].items():
-                if not name in self.all_fontnames:
+                if name not in self.all_fontnames:
                     self.all_fontnames[name] = num
                 else:
                     self.all_fontnames[name] += num
@@ -265,7 +265,7 @@ class Page_Parser:
             # print(f"BBox {len(self.bboxes)} has text")
             # get font data
             fontdata = self.get_fontdata(page_content)
-            if not fontdata in self.all_fontdata:
+            if fontdata not in self.all_fontdata:
                 self.all_fontdata.append(fontdata)
             self.data_push_fontname(fontdata)
             self.data_push_fontsize(fontdata)
