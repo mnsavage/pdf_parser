@@ -2,7 +2,7 @@ import pdfminer
 import pdfminer.high_level as pdf_hl
 import pdfminer.layout as pdf_layout
 import os
-from src.page_parser import Page_Parser
+from page_parser import Page_Parser
 
 
 class Pdf_Parser:
