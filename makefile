@@ -11,6 +11,7 @@ test:
 
 lint:
 	black .
+	pylama .
 
 docker_build:
 	sudo docker build -t $(DOCKER_IMAGE_NAME) .
