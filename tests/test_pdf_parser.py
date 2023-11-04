@@ -1,6 +1,4 @@
-import pytest
 from src.pdf_parser import Pdf_Parser
-from src.page_parser import Page_Parser
 import os
 
 
