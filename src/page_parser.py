@@ -12,7 +12,7 @@ import PIL
 from PIL import Image
 from PIL import ImageDraw
 
-
+# if DO_IMAGE:
 DO_IMAGE = True
 NEED_RENDER = False
 DO_TEST = True
