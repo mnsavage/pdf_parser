@@ -6,6 +6,9 @@ install:
 install_test:
 	pip install -r tests/requirements.txt
 
+install_tools:
+	pip install black pylama pytest
+
 test:
 	pytest
 
