@@ -1,8 +1,5 @@
-import pdfminer
 import pdfminer.high_level as pdf_hl
-import pdfminer.layout as pdf_layout
-import os
-from src.page_parser import Page_Parser
+from page_parser import Page_Parser
 
 
 class Pdf_Parser:
@@ -34,7 +31,6 @@ class Pdf_Parser:
             self._pages = pdf_hl.extract_pages(self._file_name)
             self._pages = list(self._pages)
 
-            page_handlers = []
             for page in self._pages:
                 self._page_handlers.append(Page_Parser(page))
             for ind, page in enumerate(self._page_handlers):
