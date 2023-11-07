@@ -57,10 +57,10 @@ class Pdf_Parser:
         for page in self._page_handlers:
             page: Page_Parser
             if page.content_bbox[0] < leftWidth:
-                return False
+                return True
             if page.content_bbox[2] > page.width - rightWidth:
-                return False
-        return True
+                return True
+        return False
 
     def margin_check_inches(self, leftWidth, rightWidth):
         self.unpack()
@@ -79,8 +79,8 @@ class Pdf_Parser:
             page: Page_Parser
             # If the content_bbox is unchanged from the default, return False
             if page.content_bbox == (None):
-                return False
-        return True
+                return True
+        return False
 
     # More advanced case, using the amount of filled space
     # Return true if no pages are empty
@@ -101,8 +101,8 @@ class Pdf_Parser:
             page: Page_Parser
             # If the filled ratio is less than ratio, AND the char count is less than minchars, return False
             if not page.filled_ratio(ratio) and page.get_char_count() < minchars:
-                return False
-        return True
+                return True
+        return False
 
     def check_font_size_same_throughout_pdf(self):
         self.unpack()
@@ -111,10 +111,10 @@ class Pdf_Parser:
             page: Page_Parser
             font_sizes = page.all_sizes
             if len(set(font_sizes)) > 1:
-                return False
+                return True
             elif not font_sizes[12]:
-                return False
-        return True
+                return True
+        return False
 
     def _normalize_font_name(self, font_name):
         # Remove subset tag, if exists
@@ -172,9 +172,9 @@ class Pdf_Parser:
             if len(base_fonts) > 1:
                 for font in base_fonts:
                     print(font)
-                return False
+                return True
 
-        return True
+        return False
 
     def check_bold_throughout_pdf(self):
         self.unpack()
@@ -184,8 +184,8 @@ class Pdf_Parser:
             fonts = page.all_fontnames
             for font in fonts:
                 if page.is_bold(font):
-                    return False
-        return True
+                    return True
+        return False
 
     def _find_preliminary_pages(self):
         self.unpack()
@@ -208,8 +208,8 @@ class Pdf_Parser:
             fonts = page.all_fontnames
             for font in fonts:
                 if page.is_bold(font):
-                    return False
-        return True
+                    return True
+        return False
     
     # MARK: Check title page for thesis/dissertation
 
@@ -298,10 +298,10 @@ class Pdf_Parser:
                     else:
                         newLineWidth = line.x1 - line.x0
                         if newLineWidth > lineWidth:
-                            return False
+                            return True
                         lineWidth = newLineWidth
                     lineArray.append(line)
-        return self._check_line_spacing(lineArray) == 2 and len(lineArray) == 3
+        return self._check_line_spacing(lineArray) != 2 or len(lineArray) != 3
 
     # 2 double spaces beneath title
     def check_spacing_beneath_title(self):
@@ -319,14 +319,14 @@ class Pdf_Parser:
                 else:
                     break
         print()
-        return self._check_line_spacing(lineArray) == 2 and len(lineArray) == 2
+        return self._check_line_spacing(lineArray) != 2 or len(lineArray) != 2
 
     # "by" is in all lowercase in the title page
     def check_by_lowercase(self):
         self.unpack()
 
         byInfo = self._check_by()
-        return byInfo['found_location'] != -1 and byInfo['correct_format']
+        return byInfo['found_location'] == -1 or not byInfo['correct_format']
 
     # There cannot be two co-chairs; one must be a chair and one is a co-chair
     # Checks for one appearence of "chair" and not more than one appearence of "co-chair"
@@ -338,7 +338,7 @@ class Pdf_Parser:
         for text in self._first_page_contents:
             numChairs += text.get_text().strip().lower().count("committee chair")
             numCoChairs += text.get_text().strip().lower().count("co-chair")
-        return numChairs == 1 and numCoChairs <= 1
+        return numChairs != 1 or numCoChairs > 1
 
     # Correct department listed
     # Checks for "the Department of"
@@ -347,8 +347,8 @@ class Pdf_Parser:
 
         for text in self._first_page_contents:
             if "the department of" in text.get_text().strip().lower():
-                return True
-        return False
+                return False
+        return True
 
     # TUSCALOOSA, ALABAMA in all caps with ALABAMA spelled out
     def check_location_requirement(self):
@@ -356,8 +356,8 @@ class Pdf_Parser:
 
         for text in self._first_page_contents:
             if text.get_text().strip() == 'TUSCALOOSA, ALABAMA':
-                return True
-        return False
+                return False
+        return True
 
     # Year of graduation, not year of submission, at bottom of the page
     # Checks for year at the bottom of page
@@ -366,8 +366,8 @@ class Pdf_Parser:
 
         for text in reversed(self._first_page_contents):
             if text.get_text().strip() != '':
-                return text.get_text().strip().isdigit()
-        return False
+                return not text.get_text().strip().isdigit()
+        return True
 
     # Returns student fname and lname
     # if 'by' or the name is not found, return false

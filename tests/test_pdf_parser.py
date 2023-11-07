@@ -17,7 +17,7 @@ def test_font_name():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_by_lowercase() is True
+    assert parser.check_by_lowercase() is False
 
 def test_unpack():
     # Select a PDF file to test with, assert that there are pages
@@ -43,7 +43,7 @@ def test_margin_check():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.margin_check(72, 72) is True
+    assert parser.margin_check(72, 72) is False
 
 
 def test_margin_check_bad():
@@ -54,7 +54,7 @@ def test_margin_check_bad():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.margin_check(72, 72) is False
+    assert parser.margin_check(72, 72) is True
 
 
 def test_pages_empty():
@@ -65,7 +65,7 @@ def test_pages_empty():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_empty_pages_area_charcount() is True
+    assert parser.check_empty_pages_area_charcount() is False
 
 
 # TODO: Write tests for bold, font size, and font name
@@ -79,7 +79,7 @@ def test_no_bold_in_preliminary_pages():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_bold_in_preliminary_pages() is True
+    assert parser.check_bold_in_preliminary_pages() is False
 
 
 def test_font_size():
@@ -90,7 +90,7 @@ def test_font_size():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_font_size_same_throughout_pdf() is False
+    assert parser.check_font_size_same_throughout_pdf() is True
 
 
 def test_font_name():
@@ -101,7 +101,7 @@ def test_font_name():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_font_same_throughout_pdf() is False
+    assert parser.check_font_same_throughout_pdf() is True
 
 
 def test_get_file_name():
@@ -120,7 +120,7 @@ def test_by_in_title_pass():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_by_lowercase() is True
+    assert parser.check_by_lowercase() is False
 
 def test_by_in_title_fail_formatting():
     # Test that a "by" that is capitalized will fail
@@ -130,7 +130,7 @@ def test_by_in_title_fail_formatting():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_by_lowercase() is False
+    assert parser.check_by_lowercase() is True
 
 def test_by_in_title_fail_existance():
     # Test that a "by" that is not in the title page will fail
@@ -140,7 +140,7 @@ def test_by_in_title_fail_existance():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_by_lowercase() is False
+    assert parser.check_by_lowercase() is True
 
 # MARK: testing function: check_chair_requirement
 def test_chair_requirement_pass():
@@ -151,7 +151,7 @@ def test_chair_requirement_pass():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_chair_requirement() is True
+    assert parser.check_chair_requirement() is False
 
 def test_chair_requirement_pass_no_co_chair():
     # Test that having one chair an no co chair will pass
@@ -161,7 +161,7 @@ def test_chair_requirement_pass_no_co_chair():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_chair_requirement() is True
+    assert parser.check_chair_requirement() is False
 
 def test_chair_requirement_fail_no_chair():
     # Test that having no chair will fail
@@ -171,7 +171,7 @@ def test_chair_requirement_fail_no_chair():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_chair_requirement() is False
+    assert parser.check_chair_requirement() is True
 
 def test_chair_requirement_fail_two_co_chairs():
     # Test that having more than one co chair will fail
@@ -181,7 +181,7 @@ def test_chair_requirement_fail_two_co_chairs():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_chair_requirement() is False
+    assert parser.check_chair_requirement() is True
 
 # MARK: testing function: check_department
 def test_department_pass():
@@ -192,7 +192,7 @@ def test_department_pass():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_department() is True
+    assert parser.check_department() is False
 
 def test_department_fail():
     # Test that not having the department fails
@@ -202,7 +202,7 @@ def test_department_fail():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_department() is False
+    assert parser.check_department() is True
 
 # MARK: testing function: check_location_requirement
 def test_location_requirement_pass():
@@ -213,7 +213,7 @@ def test_location_requirement_pass():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_location_requirement() is True
+    assert parser.check_location_requirement() is False
 
 def test_location_requirement_fail_location_not_fully_written():
     # Test that writing "AL" instead of "ALABAMA" fails
@@ -223,7 +223,7 @@ def test_location_requirement_fail_location_not_fully_written():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_location_requirement() is False
+    assert parser.check_location_requirement() is True
 
 def test_location_requirement_fail_location_not_all_caps():
     # Test that not having location in all caps fails
@@ -233,7 +233,7 @@ def test_location_requirement_fail_location_not_all_caps():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_location_requirement() is False
+    assert parser.check_location_requirement() is True
 
 # MARK: testing function: check_graduation_year
 def test_graduation_year_pass():
@@ -244,7 +244,7 @@ def test_graduation_year_pass():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_graduation_year() is True
+    assert parser.check_graduation_year() is False
 
 def test_graduation_year_fail_year_not_bottom():
     # Test that writing graduation year not at the very bottom fails
@@ -254,7 +254,7 @@ def test_graduation_year_fail_year_not_bottom():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_graduation_year() is False
+    assert parser.check_graduation_year() is True
 
 def test_graduation_year_fail_year_with_word():
     # Test that having characters in the graduation year fails
@@ -264,7 +264,7 @@ def test_graduation_year_fail_year_with_word():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_graduation_year() is False
+    assert parser.check_graduation_year() is True
 
 # MARK: testing function: get_paper_type
 def test_get_paper_type_pass_dissertation():
@@ -339,7 +339,7 @@ def test_title_format_pass():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_title_format() is True
+    assert parser.check_title_format() is False
 
 def test_title_format_fail_2_lines():
     # Test that a title with 2 lines fail
@@ -349,7 +349,7 @@ def test_title_format_fail_2_lines():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_title_format() is False
+    assert parser.check_title_format() is True
 
 def test_title_format_fail_4_lines():
     # Test that having a title with 4 lines fails
@@ -359,7 +359,7 @@ def test_title_format_fail_4_lines():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_title_format() is False
+    assert parser.check_title_format() is True
 
 def test_title_format_fail_1_5_spacing():
     # Test that having a title that is 1.5 spacing fails
@@ -369,7 +369,7 @@ def test_title_format_fail_1_5_spacing():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_title_format() is False
+    assert parser.check_title_format() is True
 
 def test_title_format_fail_2_5_spacing():
     # Test that having a title that is 2.5 spacing fails
@@ -379,7 +379,7 @@ def test_title_format_fail_2_5_spacing():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_title_format() is False
+    assert parser.check_title_format() is True
 
 def test_title_format_fail_mixed_spacing():
     # Test that having a title that has mixed spacing fails
@@ -389,7 +389,7 @@ def test_title_format_fail_mixed_spacing():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_title_format() is False
+    assert parser.check_title_format() is True
 
 def test_title_format_fail_middle_line_longest():
     # Test that having a title that has middle line longest
@@ -399,7 +399,7 @@ def test_title_format_fail_middle_line_longest():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_title_format() is False
+    assert parser.check_title_format() is True
 
 def test_title_format_fail_last_line_longest():
     # Test that having a title that the last line longest
@@ -409,7 +409,7 @@ def test_title_format_fail_last_line_longest():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_title_format() is False
+    assert parser.check_title_format() is True
 
 # MARK: testing function: check_spacing_beneath_title
 def test_spacing_beneath_title_pass():
@@ -420,7 +420,7 @@ def test_spacing_beneath_title_pass():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_spacing_beneath_title() is True
+    assert parser.check_spacing_beneath_title() is False
 
 def test_spacing_beneath_title_fail_one_space():
     # Test that only one line beneath title fails
@@ -430,7 +430,7 @@ def test_spacing_beneath_title_fail_one_space():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_spacing_beneath_title() is False
+    assert parser.check_spacing_beneath_title() is True
 
 def test_spacing_beneath_title_fail_1_5_spaced():
     # Test that lines under title that are 1.5 spaced fails
@@ -440,7 +440,7 @@ def test_spacing_beneath_title_fail_1_5_spaced():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_spacing_beneath_title() is False
+    assert parser.check_spacing_beneath_title() is True
 
 def test_spacing_beneath_title_fail_2_5_spaced():
     # Test that lines under title that are 2.5 spaced fails
@@ -450,4 +450,4 @@ def test_spacing_beneath_title_fail_2_5_spaced():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.check_spacing_beneath_title() is False
+    assert parser.check_spacing_beneath_title() is True
