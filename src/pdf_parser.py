@@ -30,18 +30,16 @@ class Pdf_Parser:
 
     def unpack(self):
         if not self._unpacked:
-            
             self._pages = pdf_hl.extract_pages(self._file_name)
             self._pages = list(self._pages)
 
             # custom sorting to make sure the higher y val goes first in the list
             def sort_by_ypos(e):
                 return e.y0
-            
+
             firstPage = list(self._pages[0])
             firstPage.sort(key=sort_by_ypos, reverse=True)
             self._first_page_contents = firstPage
-
 
             for page in self._pages:
                 self._page_handlers.append(Page_Parser(page))
@@ -210,7 +208,7 @@ class Pdf_Parser:
                 if page.is_bold(font):
                     return True
         return False
-    
+
     # MARK: Check title page for thesis/dissertation
 
     # check for the location of "by" in the title page
@@ -220,10 +218,13 @@ class Pdf_Parser:
         self.unpack()
 
         for index, text in enumerate(self._first_page_contents):
-            if text.get_text().strip().lower() == 'by':
-                return {'found_location': index, 'correct_format': text.get_text().strip() == 'by'}
-        return {'found_location': -1} # should throw/ display error here
-    
+            if text.get_text().strip().lower() == "by":
+                return {
+                    "found_location": index,
+                    "correct_format": text.get_text().strip() == "by",
+                }
+        return {"found_location": -1}  # should throw/ display error here
+
     # check the spacing between lines
     #   lines: an array of lines to check spacing between
     #   returns: the spacing type (1, 1.5, 2, 2.5, 3)
@@ -241,7 +242,7 @@ class Pdf_Parser:
             curSize = current.y1 - current.y0
             between = current.y0 - next.y1
             base = 0.15 * curSize
-            difference = 0.58 * curSize 
+            difference = 0.58 * curSize
             # spacing of 1
             if between > base - 1 and between < base + 1:
                 if spacing == 0:
@@ -255,24 +256,34 @@ class Pdf_Parser:
                 elif spacing != 1.5:
                     return -1
             # spacing of 2
-            elif between > base + 2 * difference - 1 and between < base + 2 * difference + 1:
+            elif (
+                between > base + 2 * difference - 1
+                and between < base + 2 * difference + 1
+            ):
                 if spacing == 0:
                     spacing = 2
                 elif spacing != 2:
                     return -1
             # spacing of 2.5
-            elif between > base + 3 * difference - 1 and between < base + 3 * difference + 1:
+            elif (
+                between > base + 3 * difference - 1
+                and between < base + 3 * difference + 1
+            ):
                 if spacing == 0:
                     spacing = 2.5
                 elif spacing != 2.5:
                     return -1
             # spacing of 3
-            elif between > base + 4 * difference - 1 and between < base + 4 * difference + 1:
+            elif (
+                between > base + 4 * difference - 1
+                and between < base + 4 * difference + 1
+            ):
                 if spacing == 0:
                     spacing = 3
                 elif spacing != 3:
                     return -1
-            else: return -1
+            else:
+                return -1
         return spacing
 
     # Title must be at least three lines that are made into an inverted pyramid and double spaced
@@ -280,12 +291,12 @@ class Pdf_Parser:
         self.unpack()
 
         byInfo = self._check_by()
-        if byInfo['found_location'] == -1:
+        if byInfo["found_location"] == -1:
             return False
-        
+
         lineArray = []
         lineWidth = 0
-        for text in self._first_page_contents[:byInfo['found_location']]:
+        for text in self._first_page_contents[: byInfo["found_location"]]:
             for line in text:
                 print(line)
                 print(lineArray)
@@ -308,11 +319,11 @@ class Pdf_Parser:
         self.unpack()
 
         byInfo = self._check_by()
-        if byInfo['found_location'] == -1:
+        if byInfo["found_location"] == -1:
             return False
-        
+
         lineArray = []
-        for text in reversed(self._first_page_contents[:byInfo['found_location']]):
+        for text in reversed(self._first_page_contents[: byInfo["found_location"]]):
             for line in text:
                 if line.get_text().strip() == "":
                     lineArray.insert(0, line)
@@ -326,7 +337,7 @@ class Pdf_Parser:
         self.unpack()
 
         byInfo = self._check_by()
-        return byInfo['found_location'] == -1 or not byInfo['correct_format']
+        return byInfo["found_location"] == -1 or not byInfo["correct_format"]
 
     # There cannot be two co-chairs; one must be a chair and one is a co-chair
     # Checks for one appearence of "chair" and not more than one appearence of "co-chair"
@@ -355,7 +366,7 @@ class Pdf_Parser:
         self.unpack()
 
         for text in self._first_page_contents:
-            if text.get_text().strip() == 'TUSCALOOSA, ALABAMA':
+            if text.get_text().strip() == "TUSCALOOSA, ALABAMA":
                 return False
         return True
 
@@ -365,7 +376,7 @@ class Pdf_Parser:
         self.unpack()
 
         for text in reversed(self._first_page_contents):
-            if text.get_text().strip() != '':
+            if text.get_text().strip() != "":
                 return not text.get_text().strip().isdigit()
         return True
 
@@ -376,15 +387,14 @@ class Pdf_Parser:
 
         byInfo = self._check_by()
 
-        if byInfo['found_location'] != -1:
-            for text in self._first_page_contents[byInfo['found_location'] + 1:]:
-                if text.get_text().strip() != '':
+        if byInfo["found_location"] != -1:
+            for text in self._first_page_contents[byInfo["found_location"] + 1 :]:
+                if text.get_text().strip() != "":
                     name = text.get_text().strip().split()
                     lname = name[len(name) - 1]
-                    fname = ' '.join(name[:len(name) - 1])
-                    return {'fname': fname, 'lname': lname}
+                    fname = " ".join(name[: len(name) - 1])
+                    return {"fname": fname, "lname": lname}
         return False
-            
 
     # Returns if document is a thesis or dissertation
     # if neiter is found, return false
@@ -392,12 +402,11 @@ class Pdf_Parser:
         self.unpack()
 
         for text in self._first_page_contents:
-            if 'dissertation' in text.get_text().strip().lower():
-                return 'dissertation'
-            if 'thesis' in text.get_text().strip().lower():
-                return 'thesis'
+            if "dissertation" in text.get_text().strip().lower():
+                return "dissertation"
+            if "thesis" in text.get_text().strip().lower():
+                return "thesis"
         return False
-
 
     def get_file_name(self):
         return self._file_name
@@ -411,6 +420,7 @@ def main():
     parser = Pdf_Parser(file_name_path)
 
     print(parser.check_title_format())
+
 
 if __name__ == "__main__":
     main()
