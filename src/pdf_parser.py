@@ -297,8 +297,6 @@ class Pdf_Parser:
         lineWidth = 0
         for text in self._first_page_contents[: byInfo["found_location"]]:
             for line in text:
-                print(line)
-                print(lineArray)
                 if line.get_text().strip() == "":
                     if len(lineArray) > 0:
                         break
@@ -392,9 +390,7 @@ class Pdf_Parser:
         byInfo = self._check_by()
 
         if byInfo["found_location"] != -1:
-            for text in self._first_page_contents[
-                byInfo["found_location"] + 1 :  # noqa
-            ]:
+            for text in self._first_page_contents[byInfo["found_location"] + 1 :]:
                 if text.get_text().strip() != "":
                     name = text.get_text().strip().split()
                     lname = name[len(name) - 1]
