@@ -389,8 +389,8 @@ class Pdf_Parser:
 
         if byInfo["found_location"] != -1:
             for text in self._first_page_contents[
-                byInfo["found_location"] + 1 :
-            ]:  # noqa
+                byInfo["found_location"] + 1 :  # noqa
+            ]:
                 if text.get_text().strip() != "":
                     name = text.get_text().strip().split()
                     lname = name[len(name) - 1]
