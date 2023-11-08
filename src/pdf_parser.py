@@ -292,7 +292,7 @@ class Pdf_Parser:
 
         byInfo = self._check_by()
         if byInfo["found_location"] == -1:
-            return False
+            return True
 
         lineArray = []
         lineWidth = 0
@@ -320,16 +320,22 @@ class Pdf_Parser:
 
         byInfo = self._check_by()
         if byInfo["found_location"] == -1:
-            return False
+            return True
 
-        lineArray = []
         for text in reversed(self._first_page_contents[: byInfo["found_location"]]):
             for line in text:
-                if line.get_text().strip() == "":
-                    lineArray.insert(0, line)
-                else:
-                    break
-        return self._check_line_spacing(lineArray) != 2 or len(lineArray) != 2
+                if line.get_text().strip() != "":
+                    between = (
+                        line.y0 - self._first_page_contents[byInfo["found_location"]].y1
+                    )
+                    size = line.y1 - line.y0
+                    base = 0.15 * size
+                    difference = 0.58 * size
+                    calculatedSpace = 3 * (base + 2 * difference) + 2 * size
+                    return (
+                        between < calculatedSpace - 3 or between > calculatedSpace + 3
+                    )
+        return True
 
     # "by" is in all lowercase in the title page
     def check_by_lowercase(self):
@@ -388,7 +394,7 @@ class Pdf_Parser:
 
         if byInfo["found_location"] != -1:
             for text in self._first_page_contents[
-                byInfo["found_location"] + 1 : # noqa
+                byInfo["found_location"] + 1 :  # noqa
             ]:
                 if text.get_text().strip() != "":
                     name = text.get_text().strip().split()
