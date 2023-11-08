@@ -326,7 +326,8 @@ class Pdf_Parser:
         for text in reversed(self._first_page_contents[: byInfo["found_location"]]):
             for line in text:
                 if line.get_text().strip() == "":
-                    lineArray.insert(0, line)
+                    # lineArray.insert(0, line)
+                    lineArray.append(line)
                 else:
                     break
         print()
