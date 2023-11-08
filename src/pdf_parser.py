@@ -326,11 +326,9 @@ class Pdf_Parser:
         for text in reversed(self._first_page_contents[: byInfo["found_location"]]):
             for line in text:
                 if line.get_text().strip() == "":
-                    # lineArray.insert(0, line)
-                    lineArray.append(line)
+                    lineArray.insert(0, line)
                 else:
                     break
-        print()
         return self._check_line_spacing(lineArray) != 2 or len(lineArray) != 2
 
     # "by" is in all lowercase in the title page
@@ -390,7 +388,7 @@ class Pdf_Parser:
 
         if byInfo["found_location"] != -1:
             for text in self._first_page_contents[
-                byInfo["found_location"] + 1 :  # noqa
+                byInfo["found_location"] + 1 : # noqa
             ]:
                 if text.get_text().strip() != "":
                     name = text.get_text().strip().split()
