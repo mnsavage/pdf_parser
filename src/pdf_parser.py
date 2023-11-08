@@ -220,7 +220,7 @@ class Pdf_Parser:
             if text.get_text().strip().lower() == "by":
                 return {
                     "found_location": index,
-+                    "correct_format": text.get_text().islower(),
+                    +"correct_format": text.get_text().islower(),
                 }
         return {"found_location": -1}  # should throw/ display error here
 
