@@ -1,6 +1,5 @@
 import pdfminer.high_level as pdf_hl
 from page_parser import Page_Parser
-import os
 
 
 class Pdf_Parser:
@@ -417,17 +416,3 @@ class Pdf_Parser:
 
     def get_file_name(self):
         return self._file_name
-
-
-def main():
-    file_name = "correct_title.pdf"
-    file_name_path = os.path.join(
-        os.path.dirname(__file__), "..", "prototyping", file_name
-    )
-    parser = Pdf_Parser(file_name_path)
-
-    print(parser.check_title_format())
-
-
-if __name__ == "__main__":
-    main()
