@@ -21,3 +21,4 @@ docker_build:
 
 docker_run:
 	sudo docker run $(DOCKER_IMAGE_NAME) python main.py
+
