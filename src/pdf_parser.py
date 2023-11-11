@@ -70,7 +70,7 @@ class Pdf_Parser:
 
     # Super basic case
     # Return true if no pages are empty
-    def check_empty_pages(self):
+    def check_no_empty_pages(self):
         self.unpack()
         for page in self._page_handlers:
             page: Page_Parser
@@ -92,16 +92,16 @@ class Pdf_Parser:
 
     # More advanced case, using the amount of filled space and the char count
     # Return true if no pages are empty
-    def check_empty_pages_area_charcount(self, ratio=0.01, minchars=3):
+    def check_no_empty_pages_area_charcount(self, ratio=0.01, minchars=3):
         self.unpack()
         for page in self._page_handlers:
             page: Page_Parser
-            # If the filled ratio is less than ratio, AND the char count is less than minchars, return False
+            # If the filled ratio is less than ratio, AND the char count is less than minchars, return True
             if not page.filled_ratio(ratio) and page.get_char_count() < minchars:
                 return True
         return False
 
-    def check_font_size_same_throughout_pdf(self):
+    def check_font_size_not_same_throughout_pdf(self):
         self.unpack()
 
         for page in self._page_handlers:
@@ -148,7 +148,7 @@ class Pdf_Parser:
 
         return font_name.strip()
 
-    def check_font_same_throughout_pdf(self):
+    def check_font_not_same_throughout_pdf(self):
         self.unpack()
         base_fonts = set()
         auxiliary_fonts = {"symbol", "arial"}  # Add more if needed
@@ -286,7 +286,7 @@ class Pdf_Parser:
         return spacing
 
     # Title must be at least three lines that are made into an inverted pyramid and double spaced
-    def check_title_format(self):
+    def check_title_format_incorrect(self):
         self.unpack()
 
         byInfo = self._check_by()
@@ -312,7 +312,7 @@ class Pdf_Parser:
         return self._check_line_spacing(lineArray) != 2 or len(lineArray) != 3
 
     # 2 double spaces beneath title
-    def check_spacing_beneath_title(self):
+    def check_spacing_beneath_title_incorrect(self):
         self.unpack()
 
         byInfo = self._check_by()
@@ -335,7 +335,7 @@ class Pdf_Parser:
         return True
 
     # "by" is in all lowercase in the title page
-    def check_by_lowercase(self):
+    def check_by_not_lowercase(self):
         self.unpack()
 
         byInfo = self._check_by()
@@ -343,7 +343,7 @@ class Pdf_Parser:
 
     # There cannot be two co-chairs; one must be a chair and one is a co-chair
     # Checks for one appearence of "chair" and not more than one appearence of "co-chair"
-    def check_chair_requirement(self):
+    def check_chair_requirement_incorrect(self):
         self.unpack()
 
         numChairs = 0
@@ -355,7 +355,7 @@ class Pdf_Parser:
 
     # Correct department listed
     # Checks for "the Department of"
-    def check_department(self):
+    def check_department_incorrect(self):
         self.unpack()
 
         for text in self._first_page_contents:
@@ -364,7 +364,7 @@ class Pdf_Parser:
         return True
 
     # TUSCALOOSA, ALABAMA in all caps with ALABAMA spelled out
-    def check_location_requirement(self):
+    def check_location_requirement_incorrect(self):
         self.unpack()
 
         for text in self._first_page_contents:
@@ -374,7 +374,7 @@ class Pdf_Parser:
 
     # Year of graduation, not year of submission, at bottom of the page
     # Checks for year at the bottom of page
-    def check_graduation_year(self):
+    def check_graduation_year_incorrect(self):
         self.unpack()
 
         for text in reversed(self._first_page_contents):
