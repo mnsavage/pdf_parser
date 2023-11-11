@@ -62,7 +62,7 @@ class Page_Parser:
         self.all_fontdata = []
         self.all_fontnames = {}
         self.all_sizes = {}
-        self.content_bbox: None | tuple = (
+        self.content_bbox: None or tuple = (
             None  # The smallest box that contains all the content
         )
         self.color_enums: dict[str, tuple] = {
@@ -103,7 +103,7 @@ class Page_Parser:
             x0, y0, x1, y1 = self.content_bbox
             self.content_bbox = (min(x0, x), min(y0, y), max(x1, x), max(y1, y))
 
-    def fill(self, x: int, y: int, color: tuple | None = None):
+    def fill(self, x: int, y: int, color: tuple or None = None):
         if x < 0:
             x = 0
         elif x >= self.width:
@@ -123,7 +123,9 @@ class Page_Parser:
             self.grid[y][x] = color
         self.content_bbox_extend(x, y)
 
-    def fill_line(self, x0: int, y0: int, x1: int, y2: int, color: tuple | None = None):
+    def fill_line(
+        self, x0: int, y0: int, x1: int, y2: int, color: tuple or None = None
+    ):
         start: tuple = (x0, y0)
         end: tuple = (x1, y2)
         distVec: tuple = (end[0] - start[0], end[1] - start[1])
@@ -145,7 +147,7 @@ class Page_Parser:
         return (x0, y0, x1, y1)
 
     def fill_bbox(
-        self, bbox: tuple, color: tuple | None = None, fillColor: tuple | None = None
+        self, bbox: tuple, color: tuple or None = None, fillColor: tuple or None = None
     ):
         if color is None:
             color = (255, 0, 0, 255)
@@ -238,13 +240,16 @@ class Page_Parser:
                     self.all_fontnames[name] += num
 
     def add_bbox(
-        self, bbox: tuple, color: tuple | None = None, fillColor: tuple | None = None
+        self, bbox: tuple, color: tuple or None = None, fillColor: tuple or None = None
     ):
         self.bboxes.append(bbox)
         self.fill_bbox(bbox, color, fillColor)
 
     def add_bbox_content(
-        self, text: str | None, color: tuple | None = None, fontdata: dict | None = None
+        self,
+        text: str or None,
+        color: tuple or None = None,
+        fontdata: dict or None = None,
     ):
         # bbox already added with add_bbox
         self.bbox_contents.append({"text": text, "color": color, "fontdata": fontdata})
@@ -252,9 +257,9 @@ class Page_Parser:
     def push_content(
         self,
         page_content: pdf_layout.LTComponent,
-        outlineColor: tuple | None = None,
-        fillColor: tuple | None = None,
-        textColor: tuple | None = None,
+        outlineColor: tuple or None = None,
+        fillColor: tuple or None = None,
+        textColor: tuple or None = None,
     ):
         bbox = page_content.bbox
         bbox = self.mirror_bbox_vertical(bbox)
