@@ -13,7 +13,7 @@ def main():
 
     try:
         # Create a DynamoDB client
-        dynamodb = boto3.resource("dynamodb")
+        dynamodb = boto3.resource("dynamodb", region_name=os.getenv("AWS_REGION"))
 
         # Reference the DynamoDB table
         table = dynamodb.Table(storage_name)
