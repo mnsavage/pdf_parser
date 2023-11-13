@@ -3,6 +3,7 @@ from pdfminer.layout import LTTextContainer
 from page_parser import Page_Parser
 import re
 
+
 class Pdf_Parser:
     def __init__(self, file_name):
         self._file_name = file_name
@@ -430,16 +431,15 @@ class Pdf_Parser:
                 if isinstance(element, LTTextContainer):
                     for line in element:
                         text = line.get_text().strip().lower()
-                        if text != '':
-                            if 'copyright' in text:
+                        if text != "":
+                            if "copyright" in text:
                                 return list(page)
                             else:
                                 break
                     else:
                         continue
                     break
-        return None # should throw/ display error that copyright page cannont be found
-
+        return None  # should throw/ display error that copyright page cannont be found
 
     # Single space between name/copyright notice and "ALL RIGHTS RESERVED"
     def check_spacing_copyright_incorrect(self):
@@ -447,30 +447,32 @@ class Pdf_Parser:
         copyrightPage = self._find_copyright_page()
 
         # make sure a copyright page is found
-        if copyrightPage == None:
+        if copyrightPage is None:
             return True
-        
+
         copyright_line = None
         all_rights_reserved_line = None
 
         for element in copyrightPage:
             if isinstance(element, LTTextContainer):
                 for line in element:
-                    text =  line.get_text().strip().lower()
-                    if copyright_line == None and 'copyright' in text:
+                    text = line.get_text().strip().lower()
+                    if copyright_line is None and "copyright" in text:
                         copyright_line = line
-                    elif all_rights_reserved_line == None and 'all rights reserved' in text:
+                    elif (
+                        all_rights_reserved_line is None
+                        and "all rights reserved" in text
+                    ):
                         all_rights_reserved_line = line
-        if copyright_line == None and copyright_line == None:
+        if copyright_line is None or copyright_line is None:
             return True
         return self._check_line_spacing([copyright_line, all_rights_reserved_line]) != 1
-
 
     # MARK: Check Abstract Page Requirements
 
     # check if a string is a roman number (help to identify page numbers)
     def _is_roman_numeral(self, text):
-        roman_numeral_regex = '^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$'
+        roman_numeral_regex = "^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$"
         return re.search(roman_numeral_regex, text)
 
     # find and return the abstract page(s)
@@ -486,25 +488,30 @@ class Pdf_Parser:
                 if isinstance(element, LTTextContainer):
                     for line in element:
                         text = line.get_text().strip().lower()
-                        if 'dedication' == text or 'list of abbreviations and symbols' == text or 'aknowledgements' == text or 'contents' == text:
-                                return abstract
-                        elif len(abstract) > 0 or text =='abstract':
+                        if (
+                            "dedication" == text
+                            or "list of abbreviations and symbols" == text
+                            or "aknowledgements" == text
+                            or "contents" == text
+                        ):
+                            return abstract
+                        elif len(abstract) > 0 or text == "abstract":
                             abstract.append(page)
                             break
                     else:
                         continue
                     break
-        return None # should throw/ display error that abstract page cannont be found
+        return None  # should throw/ display error that abstract page cannont be found
 
     # Must be double spaced and must not exceed 350-word limit
     def check_abstract_spacing_and_word_limit_incorrect(self):
         self.unpack()
 
         abstract = self._find_abstract_page()
-        if abstract == None:
+        if abstract is None:
             return True
-        
-        abstractText = ''
+
+        abstractText = ""
 
         for page in abstract:
             lineArray = []
@@ -513,19 +520,23 @@ class Pdf_Parser:
                     for line in element:
                         text = line.get_text().strip().lower()
                         # makes sure not to get empty lines, the abstract header, or numbers
-                        if text != '' and text != 'abstract' and not text.isnumeric() and not self._is_roman_numeral(text):
+                        if (
+                            text != ""
+                            and text != "abstract"
+                            and not text.isnumeric()
+                            and not self._is_roman_numeral(text)
+                        ):
                             lineArray.append(line)
-                            abstractText += ' ' + text
+                            abstractText += " " + text
             if self._check_line_spacing(lineArray) != 2:
                 return True
         return len(abstractText.split()) > 350
-
 
     # Do not include graphs, charts, tables, or other illustrations in the abstract
     def check_charts_in_abstract(self):
         self.unpack()
         abstract = self._find_abstract_page()
-        if abstract == None:
+        if abstract is None:
             return True
 
         for page in abstract:
