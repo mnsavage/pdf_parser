@@ -486,3 +486,129 @@ def test_spacing_beneath_title_fail_2_5_spaced():
     parser = Pdf_Parser(file_name_path)
 
     assert parser.check_spacing_beneath_title_incorrect() is True
+
+# MARK: testing function: check_spacing_copyright_incorrect
+def test_spacing_copyright_incorrect_pass():
+    # Test single space between copyright and all rights reserved is not incorrect
+    file_name = "copyright_correct_spacing.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_spacing_copyright_incorrect() is False
+
+
+def test_spacing_copyright_incorrect_fail_double_space():
+    # Test double space between copyright and all rights reserved is incorrect
+    file_name = "copyright_double_spacing.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_spacing_copyright_incorrect() is True
+
+def test_spacing_copyright_incorrect_fail_no_copyright_page():
+    # Test no copyright page found is incorrect
+    file_name = "correct_title.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_spacing_copyright_incorrect() is True
+
+# MARK: testing function: check_abstract_spacing_and_word_limit_incorrect
+def test_abstract_spacing_and_word_limit_incorrect_pass():
+    # Test abstract is within word limit and double space is not incorrect
+    file_name = "abstract_correct_format.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_abstract_spacing_and_word_limit_incorrect() is False
+
+
+def test_abstract_spacing_and_word_limit_incorrect_fail_1_5_space():
+    # Test abstract is incorrect because of 1.5 spacing
+    file_name = "abstract_1_5_spacing.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_abstract_spacing_and_word_limit_incorrect() is True
+
+def test_abstract_spacing_and_word_limit_incorrect_fail_2_5_space():
+    # Test abstract is incorrect because of 2.5 spacing
+    file_name = "abstract_2_5_spacing.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_abstract_spacing_and_word_limit_incorrect() is True
+
+def test_spacing_copyright_incorrect_fail_over_word_limit():
+    # Test that abstract is incorrect because over word limit
+    file_name = "abstract_over_word_limit.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_abstract_spacing_and_word_limit_incorrect() is True
+
+def test_spacing_copyright_incorrect_fail_no_abstract_page():
+    # Test no abstract page found is incorrect
+    file_name = "copyright_correct_spacing.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_abstract_spacing_and_word_limit_incorrect() is True
+
+# MARK: testing function: check_charts_in_abstract
+def test_charts_in_abstract_pass():
+    # Test that there are no charts in the abstract
+    file_name = "abstract_correct_format.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_charts_in_abstract() is False
+
+
+def test_charts_in_abstract_fail_table():
+    # Test that there are tables in the abstract
+    file_name = "abstract_with_table.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_charts_in_abstract() is True
+
+def test_charts_in_abstract_fail_chart():
+    # Test that there are charts in the abstract
+    file_name = "abstract_with_chart.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_charts_in_abstract() is True
+
+def test_charts_in_abstract_fail_image():
+    # Test that there are images in the abstract
+    file_name = "abstract_with_image.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_charts_in_abstract() is True
