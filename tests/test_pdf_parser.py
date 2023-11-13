@@ -530,6 +530,15 @@ def test_abstract_spacing_and_word_limit_incorrect_pass():
 
     assert parser.check_abstract_spacing_and_word_limit_incorrect() is False
 
+def test_abstract_spacing_and_word_limit_incorrect_pass_with_page_number():
+    # Test abstract is within word limit and double space with page number is not incorrect
+    file_name = "abstract_with_page_number.pdf"
+    file_name_path = os.path.join(
+        os.path.dirname(__file__), "..", "prototyping", file_name
+    )
+    parser = Pdf_Parser(file_name_path)
+
+    assert parser.check_abstract_spacing_and_word_limit_incorrect() is False
 
 def test_abstract_spacing_and_word_limit_incorrect_fail_1_5_space():
     # Test abstract is incorrect because of 1.5 spacing

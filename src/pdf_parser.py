@@ -1,7 +1,7 @@
 import pdfminer.high_level as pdf_hl
 from pdfminer.layout import LTTextContainer
 from page_parser import Page_Parser
-
+import re
 
 class Pdf_Parser:
     def __init__(self, file_name):
@@ -468,6 +468,11 @@ class Pdf_Parser:
 
     # MARK: Check Abstract Page Requirements
 
+    # check if a string is a roman number (help to identify page numbers)
+    def _is_roman_numeral(self, text):
+        roman_numeral_regex = '^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$'
+        return re.search(roman_numeral_regex, text)
+
     # find and return the abstract page(s)
     #   Returns array of pages that the abstract is on
     #   Returns none if abstract is not found
@@ -507,12 +512,13 @@ class Pdf_Parser:
                 if isinstance(element, LTTextContainer):
                     for line in element:
                         text = line.get_text().strip().lower()
-                        if text != '' and text != 'abstract':
+                        # makes sure not to get empty lines, the abstract header, or numbers
+                        if text != '' and text != 'abstract' and not text.isnumeric() and not self._is_roman_numeral(text):
                             lineArray.append(line)
                             abstractText += ' ' + text
             if self._check_line_spacing(lineArray) != 2:
                 return True
-        return len(abstractText.split()) > 360
+        return len(abstractText.split()) > 350
 
 
     # Do not include graphs, charts, tables, or other illustrations in the abstract
