@@ -1,5 +1,7 @@
 import pdfminer.high_level as pdf_hl
+from pdfminer.layout import LTTextContainer
 from page_parser import Page_Parser
+import re
 
 
 class Pdf_Parser:
@@ -232,6 +234,13 @@ class Pdf_Parser:
     def _check_line_spacing(self, lines):
         self.unpack()
 
+        # custom sorting to make sure the higher y val goes first in the list
+        def sort_by_ypos(e):
+            return e.y0
+
+        # make sure the lines are sorted
+        lines.sort(key=sort_by_ypos, reverse=True)
+
         if len(lines) < 2:
             return -1
         spacing = 0
@@ -408,6 +417,132 @@ class Pdf_Parser:
                 return "dissertation"
             if "thesis" in text.get_text().strip().lower():
                 return "thesis"
+        return False
+
+    # MARK: Check Copyright Page Requirements
+
+    # find and return the copyright page
+    #   Returns the page that the copyright is on
+    #   Returns none if copyright is not found
+    def _find_copyright_page(self):
+        self.unpack()
+        for page in self._pages:
+            for element in page:
+                if isinstance(element, LTTextContainer):
+                    for line in element:
+                        text = line.get_text().strip().lower()
+                        if text != "":
+                            if "copyright" in text:
+                                return list(page)
+                            else:
+                                break
+                    else:
+                        continue
+                    break
+        return None  # should throw/ display error that copyright page cannont be found
+
+    # Single space between name/copyright notice and "ALL RIGHTS RESERVED"
+    def check_spacing_copyright_incorrect(self):
+        self.unpack()
+        copyrightPage = self._find_copyright_page()
+
+        # make sure a copyright page is found
+        if copyrightPage is None:
+            return True
+
+        copyright_line = None
+        all_rights_reserved_line = None
+
+        for element in copyrightPage:
+            if isinstance(element, LTTextContainer):
+                for line in element:
+                    text = line.get_text().strip().lower()
+                    if copyright_line is None and "copyright" in text:
+                        copyright_line = line
+                    elif (
+                        all_rights_reserved_line is None
+                        and "all rights reserved" in text
+                    ):
+                        all_rights_reserved_line = line
+        if copyright_line is None or copyright_line is None:
+            return True
+        return self._check_line_spacing([copyright_line, all_rights_reserved_line]) != 1
+
+    # MARK: Check Abstract Page Requirements
+
+    # check if a string is a roman number (help to identify page numbers)
+    def _is_roman_numeral(self, text):
+        roman_numeral_regex = "^m{0,3}(cm|cd|d?c{0,3})(xc|xl|l?x{0,3})(ix|iv|v?i{0,3})$"
+        return re.search(roman_numeral_regex, text)
+
+    # find and return the abstract page(s)
+    #   Returns array of pages that the abstract is on
+    #   Returns none if abstract is not found
+    def _find_abstract_page(self):
+        self.unpack()
+
+        abstract = []
+
+        for page in self._pages:
+            for element in page:
+                if isinstance(element, LTTextContainer):
+                    for line in element:
+                        text = line.get_text().strip().lower()
+                        if (
+                            "dedication" == text
+                            or "list of abbreviations and symbols" == text
+                            or "aknowledgements" == text
+                            or "contents" == text
+                        ):
+                            return abstract
+                        elif len(abstract) > 0 or text == "abstract":
+                            abstract.append(page)
+                            break
+                    else:
+                        continue
+                    break
+        return None  # should throw/ display error that abstract page cannont be found
+
+    # Must be double spaced and must not exceed 350-word limit
+    def check_abstract_spacing_and_word_limit_incorrect(self):
+        self.unpack()
+
+        abstract = self._find_abstract_page()
+        if abstract is None:
+            return True
+
+        abstractText = ""
+
+        for page in abstract:
+            lineArray = []
+            for element in page:
+                if isinstance(element, LTTextContainer):
+                    for line in element:
+                        text = line.get_text().strip().lower()
+                        # makes sure not to get empty lines, the abstract header, or numbers
+                        if (
+                            text != ""
+                            and text != "abstract"
+                            and not text.isnumeric()
+                            and not self._is_roman_numeral(text)
+                        ):
+                            lineArray.append(line)
+                            abstractText += " " + text
+            if self._check_line_spacing(lineArray) != 2:
+                return True
+        return len(abstractText.split()) > 350
+
+    # Do not include graphs, charts, tables, or other illustrations in the abstract
+    def check_charts_in_abstract(self):
+        self.unpack()
+        abstract = self._find_abstract_page()
+        if abstract is None:
+            return True
+
+        for page in abstract:
+            for element in page:
+                if not isinstance(element, LTTextContainer):
+                    return True
         return False
 
     def get_file_name(self):
