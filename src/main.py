@@ -5,7 +5,7 @@ from pdf_parser import Pdf_Parser
 
 
 def get_pdf_requirements_validation(pdf):
-    parser = Pdf_Parser(pdf)  # this takes in a file name??
+    parser = Pdf_Parser(pdf)
 
     name = parser.get_student_name()
     if name is False:
