@@ -1,10 +1,15 @@
 import os
 import boto3
+import base64
+from io import BytesIO
 from botocore.exceptions import ClientError
 from pdf_parser import Pdf_Parser
 
 
 def get_pdf_requirements_validation(pdf):
+    """
+    Description: creates a dictionary with information about the requirements the pdf passes or not
+    """
     parser = Pdf_Parser(pdf)
 
     name = parser.get_student_name()
@@ -305,6 +310,27 @@ def get_pdf_requirements_validation(pdf):
     return pdf_requirments
 
 
+def ensure_base64_padding(encoded_str):
+    """
+    Description: checks for incorrect base64 padding and if exist fixes it
+    """
+    missing_padding = len(encoded_str) % 4
+    if missing_padding:
+        encoded_str += "=" * (4 - missing_padding)
+
+    return encoded_str
+
+
+def convert_encoded_pdf_to_io(encoded_pdf):
+    """
+    Description: converts a encoded pdf to io for pdfminer library to use
+    """
+    encoded_pdf = ensure_base64_padding(encoded_str=encoded_pdf)
+    decoded_pdf = base64.b64decode(encoded_pdf)
+    pdf_io = BytesIO(decoded_pdf)
+    return pdf_io
+
+
 def main():
     storage_name = os.getenv("DYNAMODB_NAME", None)
     UUID = os.getenv("DYNAMODB_KEY", None)
@@ -325,7 +351,9 @@ def main():
 
         # Define new values for job_status and job_output
         new_job_status = "completed"
-        new_job_output = "hello world from batch job"
+        encoded_pdf = table.get_item(Key=key).get("Item", {}).get("encoded_pdf")
+        pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)
+        new_job_output = get_pdf_requirements_validation(pdf=pdf_io)
 
         # Update the 'job_status' and 'job_output' attributes of the item with the given key
         update_expression = "SET job_status = :new_status, job_output = :new_output"
