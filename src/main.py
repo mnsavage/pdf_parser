@@ -13,20 +13,18 @@ def get_pdf_requirements_validation(pdf):
     """
     parser = Pdf_Parser(pdf)
 
-    name = parser.get_student_name()
-    if name is False:
-        name.fname = "could_not_find_name"
-        name.lname = "error"
+    first_name, last_name = parser.get_student_name()
+    first_name = "could_not_find_name" if first_name is None else first_name
+    last_name = "error" if last_name is None else last_name
 
-    paperType = parser.get_paper_type()
-    if paperType is False:
-        paperType == "could_not_find_paper_type"
+    paper_type = parser.get_paper_type()
+    paper_type = "could_not_find_paper_type" if paper_type is None else paper_type
 
     pdf_requirments = {
         "name": parser.get_file_name(),
-        "newName": f"{name.lname}.{name.fname}.{paperType}",
-        "fname": name.fname,
-        "lname": name.lname,
+        "newName": f"{last_name}.{first_name}.{paper_type}",
+        "fname": first_name,
+        "lname": last_name,
         "header": [
             {
                 "title": "Document Formatting",
@@ -365,7 +363,6 @@ def main():
         # Define new values for job_status and job_output
         new_job_status = "completed"
         encoded_pdf = s3_object["Body"].read()
-        print(f"encoded pdf: {encoded_pdf}")
         pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)
         new_job_output = get_pdf_requirements_validation(pdf=pdf_io)
 

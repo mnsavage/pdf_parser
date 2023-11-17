@@ -404,8 +404,8 @@ class Pdf_Parser:
                     name = text.get_text().strip().split()
                     lname = name[len(name) - 1]
                     fname = " ".join(name[: len(name) - 1])
-                    return {"fname": fname, "lname": lname}
-        return False
+                    return fname, lname
+        return None, None
 
     # Returns if document is a thesis or dissertation
     # if neiter is found, return false
@@ -417,7 +417,7 @@ class Pdf_Parser:
                 return "dissertation"
             if "thesis" in text.get_text().strip().lower():
                 return "thesis"
-        return False
+        return None
 
     # MARK: Check Copyright Page Requirements
 

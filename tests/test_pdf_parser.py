@@ -315,7 +315,7 @@ def test_get_paper_type_fail_none_found():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.get_paper_type() is False
+    assert parser.get_paper_type() is None
 
 
 # MARK: testing function: get_student_name
@@ -327,8 +327,10 @@ def test_get_student_name_pass():
     )
     parser = Pdf_Parser(file_name_path)
 
-    assert parser.get_student_name()["fname"] == "STUDENTFNAME"
-    assert parser.get_student_name()["lname"] == "STUDENTLNAME"
+    first_name, last_name = parser.get_student_name()
+
+    assert first_name == "STUDENTFNAME"
+    assert last_name == "STUDENTLNAME"
 
 
 def test_get_student_name_pass_mname_in_fname():
@@ -338,9 +340,10 @@ def test_get_student_name_pass_mname_in_fname():
         os.path.dirname(__file__), "..", "prototyping", file_name
     )
     parser = Pdf_Parser(file_name_path)
+    first_name, last_name = parser.get_student_name()
 
-    assert parser.get_student_name()["fname"] == "STUDENTFNAME STUDENTMNAME"
-    assert parser.get_student_name()["lname"] == "STUDENTLNAME"
+    assert first_name == "STUDENTFNAME STUDENTMNAME"
+    assert last_name == "STUDENTLNAME"
 
 
 def test_get_student_name_fail_no_by_found():
@@ -350,8 +353,10 @@ def test_get_student_name_fail_no_by_found():
         os.path.dirname(__file__), "..", "prototyping", file_name
     )
     parser = Pdf_Parser(file_name_path)
+    first_name, last_name = parser.get_student_name()
 
-    assert parser.get_student_name() is False
+    assert first_name is None
+    assert last_name is None
 
 
 # MARK: testing function: check_title_format_incorrect
