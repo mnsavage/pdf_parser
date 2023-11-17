@@ -20,8 +20,7 @@ def get_pdf_requirements_validation(pdf):
     paper_type = parser.get_paper_type()
     paper_type = "could_not_find_paper_type" if paper_type is None else paper_type
 
-    pdf_requirments = {
-        "name": parser.get_file_name(),
+    pdf_requirements = {
         "newName": f"{last_name}.{first_name}.{paper_type}",
         "fname": first_name,
         "lname": last_name,
@@ -306,7 +305,7 @@ def get_pdf_requirements_validation(pdf):
         ],
     }
 
-    return pdf_requirments
+    return pdf_requirements
 
 
 def ensure_base64_padding(encoded_pdf):
