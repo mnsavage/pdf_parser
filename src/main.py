@@ -357,7 +357,7 @@ def main():
 
         # Define new values for job_status and job_output
         new_job_status = "completed"
-        encoded_pdf = s3_object["body"].read()
+        encoded_pdf = s3_object["Body"].read()
         pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)
         new_job_output = get_pdf_requirements_validation(pdf=pdf_io)
 
