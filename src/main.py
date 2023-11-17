@@ -111,7 +111,7 @@ def get_pdf_requirements_validation(pdf):
                     },
                     {
                         "title": "Title page: There cannot be two co-chairs; one must be a chair and one is a co-chair",
-                        "met": parser.check_chair_requirement_incorrect,
+                        "met": parser.check_chair_requirement_incorrect(),
                     },
                     {
                         "title": "Title page: Correct department listed",
