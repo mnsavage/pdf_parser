@@ -311,22 +311,29 @@ def get_pdf_requirements_validation(pdf):
     return pdf_requirments
 
 
-def ensure_base64_padding(encoded_str):
+def ensure_base64_padding(encoded_pdf):
     """
     Description: checks for incorrect base64 padding and if exist fixes it
     """
-    missing_padding = len(encoded_str) % 4
+    missing_padding = len(encoded_pdf) % 4
     if missing_padding:
-        encoded_str += "=" * (4 - missing_padding)
+        if isinstance(encoded_pdf, str):
+            encoded_pdf += "=" * (4 - missing_padding)
+        elif isinstance(encoded_pdf, bytes):
+            encoded_pdf += b"=" * (4 - missing_padding)
+        else:
+            raise TypeError(
+                f"Expected data to be bytes or string, got {type(encoded_pdf)} instead."
+            )
 
-    return encoded_str
+    return encoded_pdf
 
 
 def convert_encoded_pdf_to_io(encoded_pdf):
     """
     Description: converts a encoded pdf to io for pdfminer library to use
     """
-    encoded_pdf = ensure_base64_padding(encoded_str=encoded_pdf)
+    encoded_pdf = ensure_base64_padding(encoded_pdf)
     decoded_pdf = base64.b64decode(encoded_pdf)
     pdf_io = BytesIO(decoded_pdf)
     return pdf_io
@@ -358,6 +365,7 @@ def main():
         # Define new values for job_status and job_output
         new_job_status = "completed"
         encoded_pdf = s3_object["Body"].read()
+        print(f"encoded pdf: {encoded_pdf}")
         pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)
         new_job_output = get_pdf_requirements_validation(pdf=pdf_io)
 
