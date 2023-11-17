@@ -51,8 +51,8 @@ class Page_Parser:
         self.page: pdf_layout.LTPage = page
         self.unpacked: bool = False
         self.bbox: tuple = page.bbox
-        self.width: int = page.width
-        self.height: int = page.height
+        self.width: int = int(page.width)
+        self.height: int = int(page.height)
         self.grid = [
             [(255, 255, 255, 255) for _ in range(self.width)]
             for _ in range(self.height)
