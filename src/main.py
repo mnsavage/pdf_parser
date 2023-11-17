@@ -316,8 +316,6 @@ def ensure_base64_padding(encoded_pdf):
     if missing_padding:
         if isinstance(encoded_pdf, str):
             encoded_pdf += "=" * (4 - missing_padding)
-        elif isinstance(encoded_pdf, bytes):
-            encoded_pdf += b"=" * (4 - missing_padding)
         else:
             raise TypeError(
                 f"Expected data to be bytes or string, got {type(encoded_pdf)} instead."
@@ -330,6 +328,9 @@ def convert_encoded_pdf_to_io(encoded_pdf):
     """
     Description: converts a encoded pdf to io for pdfminer library to use
     """
+    if isinstance(encoded_pdf, bytes):
+        encoded_pdf = encoded_pdf.decode('utf-8')
+        
     encoded_pdf = ensure_base64_padding(encoded_pdf)
     decoded_pdf = base64.b64decode(encoded_pdf)
     pdf_io = BytesIO(decoded_pdf)
