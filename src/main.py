@@ -342,16 +342,14 @@ def main():
         raise ValueError("Environment variables were not retrieve")
 
     try:
-        # Create a DynamoDB and s3 client
+        # Reference the DynamoDB table
         dynamodb_client = boto3.resource(
             "dynamodb", region_name=os.getenv("AWS_REGION")
         )
-        s3_client = boto3.resource("s3", region_name=os.getenv("AWS_REGION"))
-
-        # Reference the DynamoDB table
         table = dynamodb_client.Table(dynamo_name)
 
         # Reference s3 object
+        s3_client = boto3.client("s3", region_name=os.getenv("AWS_REGION"))
         s3_object = s3_client.get_object(Bucket=s3_name, Key=UUID)
 
         # Key of the item you want to update (replace UUID with your actual uuid value)
