@@ -370,7 +370,7 @@ def main():
         update_expression = "SET job_status = :new_status, job_output = :new_output"
         expression_attribute_values = {
             ":new_status": new_job_status,
-            ":new_output": json.dumps(new_job_output),
+            ":new_output": new_job_output,
         }
 
         # Perform the update operation
