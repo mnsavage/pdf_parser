@@ -7,7 +7,7 @@ from botocore.exceptions import ClientError
 from pdf_parser import Pdf_Parser
 
 
-def get_pdf_requirements_validation(pdf):
+def get_pdf_requirements_validation(pdf, old_file_name):
     """
     Description: creates a dictionary with information about the requirements the pdf passes or not
     """
@@ -21,6 +21,7 @@ def get_pdf_requirements_validation(pdf):
     paper_type = "could_not_find_paper_type" if paper_type is None else paper_type
 
     pdf_requirements = {
+        "name": old_file_name,
         "newName": f"{last_name}.{first_name}.{paper_type}",
         "fname": first_name,
         "lname": last_name,
@@ -329,8 +330,8 @@ def convert_encoded_pdf_to_io(encoded_pdf):
     Description: converts a encoded pdf to io for pdfminer library to use
     """
     if isinstance(encoded_pdf, bytes):
-        encoded_pdf = encoded_pdf.decode('utf-8')
-        
+        encoded_pdf = encoded_pdf.decode("utf-8")
+
     encoded_pdf = ensure_base64_padding(encoded_pdf)
     decoded_pdf = base64.b64decode(encoded_pdf)
     pdf_io = BytesIO(decoded_pdf)
@@ -341,6 +342,7 @@ def main():
     dynamo_name = os.getenv("DYNAMODB_NAME", None)
     s3_name = os.getenv("S3_NAME", None)
     UUID = os.getenv("DYNAMODB_KEY", None)
+    file_name = os.getenv("FILE_NAME", None)
 
     # check if environment variables were retrieve
     if dynamo_name is None and UUID is None:
@@ -364,7 +366,9 @@ def main():
         new_job_status = "completed"
         encoded_pdf = s3_object["Body"].read()
         pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)
-        new_job_output = get_pdf_requirements_validation(pdf=pdf_io)
+        new_job_output = get_pdf_requirements_validation(
+            pdf=pdf_io, old_file_name=file_name
+        )
 
         # Update the 'job_status' and 'job_output' attributes of the item with the given key
         update_expression = "SET job_status = :new_status, job_output = :new_output"
