@@ -158,7 +158,7 @@ def main():
         )
 
     except ClientError as e: # encoded pdf validation fails
-        handle_pdf_requirements_validation_failure(e, encoded_pdf, file_name, table)
+        handle_pdf_requirements_validation_failure(e, encoded_pdf, file_name, table, key)
 
     else:
         upload_successful_pdf_requirements_validation(job_output, table, key)
