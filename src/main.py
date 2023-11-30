@@ -17,27 +17,6 @@ def get_file_info(pdf):
 
 
     return first_name, last_name, new_file_name
-
-def handle_pdf_requirements_validation_failure(e, encoded_pdf, file_name, table, key):
-        error_message = f"Error message: {e}"
-
-        with open('pdf_validation_output.json', 'r') as file:
-            data = json.load(file)
-            
-        data["name"] = file_name
-        
-        update_expression = "SET job_status = :new_status, job_output = :new_output"
-        expression_attribute_values = {
-            ":new_status": e,
-            ":new_output": json.dumps(data),
-        }
-        table.update_item(
-            Key=key,
-            UpdateExpression=update_expression,
-            ExpressionAttributeValues=expression_attribute_values,
-            ReturnValues="UPDATED_NEW",  # Returns the new values of the updated attributes
-        )
-        raise Exception(error_message)
     
 def upload_successful_pdf_requirements_validation(job_output, table, key):
         update_expression = "SET job_status = :new_status, job_output = :new_output"
@@ -173,10 +152,6 @@ def main():
     UUID = os.getenv("DYNAMODB_KEY", None)
     file_name = os.getenv("FILE_NAME", None)
 
-    # check if environment variables were retrieve
-    if dynamo_name is None and UUID is None:
-        raise ValueError("Environment variables were not retrieve")
-
     # Reference the DynamoDB table
     dynamodb_client = boto3.resource(
         "dynamodb", region_name=os.getenv("AWS_REGION")
@@ -190,19 +165,13 @@ def main():
     # Key of the item you want to update (replace UUID with your actual uuid value)
     key = {"uuid": UUID}
     
-    try:
-        # Define new values for job_status and job_output
-        encoded_pdf = s3_object["Body"].read()
-        pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)
-        job_output = get_pdf_requirements_validation(
-            pdf=pdf_io, old_file_name=file_name
-        )
-
-    except ClientError as e: # encoded pdf validation fails
-        handle_pdf_requirements_validation_failure(e, encoded_pdf, file_name, table, key)
-
-    else:
-        upload_successful_pdf_requirements_validation(job_output, table, key)
+    # Define new values for job_status and job_output
+    encoded_pdf = s3_object["Body"].read()
+    pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)
+    job_output = get_pdf_requirements_validation(
+        pdf=pdf_io, old_file_name=file_name
+    )
+    upload_successful_pdf_requirements_validation(job_output, table, key)
 
 
 if __name__ == "__main__":
