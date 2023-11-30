@@ -58,8 +58,10 @@ def get_pdf_requirements_validation(pdf, old_file_name):
     Description: creates a dictionary with information about the requirements the pdf passes or not
     """
     parser = Pdf_Parser(pdf)
-    first_name, last_name, new_file_name = get_file_info(pdf)
-
+    try:
+        first_name, last_name, new_file_name = get_file_info(pdf)
+    except Exception:
+        first_name = last_name = new_file_name = None
 
 
     
@@ -72,21 +74,63 @@ def get_pdf_requirements_validation(pdf, old_file_name):
     data["fname"] = first_name
     data["lname"] = last_name
     # Page Formatting & Font
-    data["header"][1]["requirements"][0]["met"] = parser.margin_check(72, 72)
-    data["header"][1]["requirements"][3]["met"] = parser.check_font_size_not_same_throughout_pdf()
-    data["header"][1]["requirements"][4]["met"] = parser.check_bold_in_preliminary_pages()
-    data["header"][1]["requirements"][7]["met"] = parser.check_no_empty_pages() or parser.check_font_not_same_throughout_pdf()
+    try:
+        data["header"][1]["requirements"][0]["met"] = parser.margin_check(72, 72)
+    except Exception:
+        data["header"][1]["requirements"][0]["met"] = None
+    try:
+        data["header"][1]["requirements"][3]["met"] = parser.check_font_size_not_same_throughout_pdf()
+    except Exception:
+        data["header"][1]["requirements"][3]["met"] = None
+    try:
+        data["header"][1]["requirements"][4]["met"] = parser.check_bold_in_preliminary_pages()
+    except Exception:
+        data["header"][1]["requirements"][4]["met"] = None
+    try:
+        data["header"][1]["requirements"][7]["met"] = parser.check_no_empty_pages() or parser.check_font_not_same_throughout_pdf()
+    except Exception:
+        data["header"][1]["requirements"][7]["met"] = None
     # Page Order & Section Formatting
-    data["header"][2]["requirements"][0]["met"] = parser.check_title_format_incorrect()
-    data["header"][2]["requirements"][1]["met"] = parser.check_spacing_beneath_title_incorrect()
-    data["header"][2]["requirements"][2]["met"] = parser.check_by_not_lowercase()
-    data["header"][2]["requirements"][3]["met"] = parser.check_chair_requirement_incorrect()
-    data["header"][2]["requirements"][4]["met"] = parser.check_department_incorrect()
-    data["header"][2]["requirements"][5]["met"] = parser.check_location_requirement_incorrect()
-    data["header"][2]["requirements"][6]["met"] = parser.check_graduation_year_incorrect()
-    data["header"][2]["requirements"][7]["met"] = parser.check_spacing_copyright_incorrect()
-    data["header"][2]["requirements"][8]["met"] = parser.check_abstract_spacing_and_word_limit_incorrect()
-    data["header"][2]["requirements"][9]["met"] = parser.check_charts_in_abstract()
+    try:
+        data["header"][2]["requirements"][0]["met"] = parser.check_title_format_incorrect()
+    except Exception:
+        data["header"][2]["requirements"][0]["met"] = None
+    try:    
+        data["header"][2]["requirements"][1]["met"] = parser.check_spacing_beneath_title_incorrect()
+    except Exception:
+        data["header"][2]["requirements"][1]["met"] = None
+    try:
+        data["header"][2]["requirements"][2]["met"] = parser.check_by_not_lowercase()
+    except Exception:
+        data["header"][2]["requirements"][2]["met"] = None
+    try:
+        data["header"][2]["requirements"][3]["met"] = parser.check_chair_requirement_incorrect()
+    except Exception:
+        data["header"][2]["requirements"][3]["met"] = None
+    try:
+        data["header"][2]["requirements"][4]["met"] = parser.check_department_incorrect()
+    except Exception:
+        data["header"][2]["requirements"][4]["met"] = None
+    try:
+        data["header"][2]["requirements"][5]["met"] = parser.check_location_requirement_incorrect()
+    except Exception:
+        data["header"][2]["requirements"][5]["met"] = None
+    try:
+        data["header"][2]["requirements"][6]["met"] = parser.check_graduation_year_incorrect()
+    except Exception:
+        data["header"][2]["requirements"][6]["met"] = None
+    try:
+        data["header"][2]["requirements"][7]["met"] = parser.check_spacing_copyright_incorrect()
+    except Exception:
+        data["header"][2]["requirements"][7]["met"] = None
+    try:
+        data["header"][2]["requirements"][8]["met"] = parser.check_abstract_spacing_and_word_limit_incorrect()
+    except Exception:
+        data["header"][2]["requirements"][8]["met"] = None
+    try:
+        data["header"][2]["requirements"][9]["met"] = parser.check_charts_in_abstract()
+    except Exception:
+        data["header"][2]["requirements"][9]["met"] = None
     
     #is pdf and validation work
     data["header"][0]["requirements"][0]["met"] = False
