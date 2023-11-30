@@ -7,7 +7,7 @@
         {
             "title": "Document Formatting",
             "requirements": [
-                {"title": "File format: PDF", "met": true},
+                {"title": "File format: PDF", "met": null},
                 {
                     "title": "File name must use only English letters, underscore lines, and Arabic numbers with no spaces in the file name ",
                     "met": null

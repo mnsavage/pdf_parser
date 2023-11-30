@@ -20,17 +20,11 @@ def get_file_info(pdf):
 
 def handle_pdf_requirements_validation_failure(e, encoded_pdf, file_name, table, key):
         error_message = f"Error message: {e}"
-        
-        pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)
-        first_name, last_name, new_file_name = get_file_info(pdf_io)
+
         with open('pdf_validation_output.json', 'r') as file:
             data = json.load(file)
             
-        #file info
         data["name"] = file_name
-        data["newName"] = new_file_name
-        data["fname"] = first_name
-        data["lname"] = last_name
         
         update_expression = "SET job_status = :new_status, job_output = :new_output"
         expression_attribute_values = {
@@ -93,6 +87,9 @@ def get_pdf_requirements_validation(pdf, old_file_name):
     data["header"][2]["requirements"][7]["met"] = parser.check_spacing_copyright_incorrect()
     data["header"][2]["requirements"][8]["met"] = parser.check_abstract_spacing_and_word_limit_incorrect()
     data["header"][2]["requirements"][9]["met"] = parser.check_charts_in_abstract()
+    
+    #is pdf and validation work
+    data["header"][0]["requirements"][0]["met"] = False
     
     return data
 
