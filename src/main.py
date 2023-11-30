@@ -3,11 +3,14 @@ import boto3
 import base64
 import json
 from io import BytesIO
-from botocore.exceptions import ClientError
 from pdf_parser import Pdf_Parser
+import fitz 
 
-def get_file_info(pdf):
-    parser = Pdf_Parser(pdf)
+def get_page_count(pdf):
+    with fitz.open(stream=pdf, filetype="pdf") as doc:
+        return doc.page_count
+
+def get_file_info(parser):
     first_name, last_name = parser.get_student_name()
     first_name = "could_not_find_name" if first_name is None else first_name
     last_name = "error" if last_name is None else last_name
@@ -36,16 +39,19 @@ def get_pdf_requirements_validation(pdf, old_file_name):
     """
     Description: creates a dictionary with information about the requirements the pdf passes or not
     """
-    parser = Pdf_Parser(pdf)
-    try:
-        first_name, last_name, new_file_name = get_file_info(pdf)
-    except Exception:
-        first_name = last_name = new_file_name = None
-
-
-    
     with open('pdf_validation_output.json', 'r') as file:
         data = json.load(file)
+    
+    max_page_count = 70
+    if get_page_count(pdf) > max_page_count:
+        return data
+    
+    parser = Pdf_Parser(pdf)
+    
+    try:
+        first_name, last_name, new_file_name = get_file_info(parser)
+    except Exception:
+        first_name = last_name = new_file_name = None
         
     #file info
     data["name"] = old_file_name
@@ -164,7 +170,6 @@ def main():
 
     # Key of the item you want to update (replace UUID with your actual uuid value)
     key = {"uuid": UUID}
-    
     # Define new values for job_status and job_output
     encoded_pdf = s3_object["Body"].read()
     pdf_io = convert_encoded_pdf_to_io(encoded_pdf=encoded_pdf)

@@ -1,3 +1,4 @@
 pdfminer.six
 pillow
 boto3
+PyMuPDF
