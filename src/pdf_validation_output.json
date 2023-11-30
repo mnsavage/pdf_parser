@@ -211,7 +211,7 @@
             "requirements": [
                 {
                     "title": "Table/figure placement: Tables/figures may not be grouped at the end of the dissertation",
-                    "met": true
+                    "met": null
                 },
                 {
                     "title": "Table/figure headings: Table headings must be positioned above the table using the same font style and size as used in the main body text ",
