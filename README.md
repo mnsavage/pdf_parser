@@ -1,4 +1,5 @@
 # pdf-parser
+This repository includes our code and logic dedicated to parsing and validating PDFs. Additionally, we utilize Docker to containerize this program, enabling it to run as a batch job on AWS.
 
 ## install requirements:
 - run the make command `make install`
